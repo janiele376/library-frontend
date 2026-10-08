@@ -20,10 +20,10 @@ export default defineConfig((ctx) => {
     extras: [
       // 'ionicons-v4',
       // 'mdi-v7',
-      // 'fontawesome-v7',
       // 'eva-icons',
       // 'themify',
       // 'line-awesome',
+      'fontawesome-v7',
 
       'roboto-font', // optional, you are not bound to it
       'material-icons', // optional, you are not bound to it

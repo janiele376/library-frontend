@@ -5,32 +5,44 @@
     </div>
 
     <div class="container-form">
+      <q-btn class="arrow-back" icon="arrow_back" to="/" flat round dense size="20px"></q-btn>
+
       <div class="title-form">
         <img src="../assets/book-logo.svg" alt="Livro" />
-        <h4>Entrar</h4>
+        <h4>Esqueci Senha</h4>
       </div>
 
       <q-form class="info">
         <MainInput name="Email:" icon="email" type="email" placeholder="email@gmail.com" />
 
+        <MainInput
+          name="CPF:"
+          icon="badge"
+          type="text"
+          mask="###.###.###-##"
+          placeholder="000.000.000-00"
+        />
+
         <MainInput name="Senha:" icon="lock" type="password" :password="true" placeholder="Senha" />
 
-        <div class="forgot-password">
-          <RouterLink to="/forgot-password">Esqueci a senha</RouterLink>
-        </div>
+        <MainInput
+          name="Confirmar Senha:"
+          icon="lock"
+          type="password"
+          :password="true"
+          placeholder="Confirmar Senha"
+        />
 
-        <BtnDivider name_confirm="Entrar" name_cancel="Cadastre-se" path_cancel="/register" />
+        <BtnDivider name_confirm="Enviar" name_cancel="Cancelar" />
       </q-form>
     </div>
   </q-page>
-  <AuthFooter />
 </template>
 
 <script setup lang="ts">
 import PhraseLibrary from '@/components/auth/PhraseLibrary.vue';
 import BtnDivider from '@/components/BtnDivider.vue';
 import MainInput from '@/components/MainInput.vue';
-import AuthFooter from '@/components/auth/AuthFooter.vue';
 </script>
 
 <style scoped>
@@ -44,6 +56,17 @@ import AuthFooter from '@/components/auth/AuthFooter.vue';
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+.arrow-back {
+  margin-right: auto;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  margin-bottom: -2.5rem;
+}
+
+.arrow-back:hover {
+  opacity: 0.5;
 }
 
 .title-form {
