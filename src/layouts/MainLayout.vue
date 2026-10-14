@@ -1,6 +1,6 @@
 <template>
   <q-layout view="lHh Lpr lFf">
-    <MainHeader />
+    <MainHeader :login="true" />
 
     <q-page-container>
       <router-view />

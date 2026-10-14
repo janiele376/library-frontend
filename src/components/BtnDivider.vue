@@ -1,18 +1,31 @@
 <template>
   <div class="btns">
-    <q-btn type="button" class="btn-confirmar" name="btn-confirmar" :to="path_confirm">
-      {{ name_confirm }}</q-btn
+    <q-btn
+      type="button"
+      class="btn-confirmar"
+      name="btn-confirmar"
+      :to="action_confirm ? undefined : path_confirm"
+      :loading="loading"
+      :disable="loading"
+      @click="action_confirm?.()"
     >
+      {{ name_confirm }}
+    </q-btn>
 
     <div class="divider">
       <span></span>
-
       <p>ou</p>
-
       <span></span>
     </div>
 
-    <q-btn type="button" class="btn-cancel" name="btn-cancel" :to="path_cancel">
+    <q-btn
+      type="button"
+      class="btn-cancel"
+      name="btn-cancel"
+      :to="action_cancel ? undefined : path_cancel"
+      :disable="loading"
+      @click="action_cancel?.()"
+    >
       {{ name_cancel }}
     </q-btn>
   </div>
@@ -24,11 +37,15 @@ export interface BtnDivider {
   name_cancel?: string;
   path_confirm?: string;
   path_cancel?: string;
+  action_confirm?: () => void | Promise<void>;
+  action_cancel?: () => void | Promise<void>;
+  loading?: boolean;
 }
 
 withDefaults(defineProps<BtnDivider>(), {
   name_confirm: '',
   name_cancel: '',
+  loading: false,
 });
 </script>
 

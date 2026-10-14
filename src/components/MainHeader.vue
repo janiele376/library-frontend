@@ -9,17 +9,9 @@
         <div class="imgs">
           <img class="img-user" src="../assets/book-logo.svg" alt="Usuário" />
 
-          <q-btn
-            class="img-adjustments"
-            icon="settings"
-            to="/"
-            flat
-            round
-            dense
-            size="20px"
-          ></q-btn>
+          <q-btn class="img-adjustments" icon="settings" to="/" flat round dense size="20px" />
 
-          <q-btn class="img-logout" icon="logout" to="/" flat round dense size="20px"></q-btn>
+          <q-btn class="img-logout" icon="logout" @click="logout" flat round dense size="20px" />
         </div>
 
         <div class="text">
@@ -35,6 +27,8 @@
 </template>
 
 <script setup lang="ts">
+import { useRouter } from 'vue-router';
+
 export interface InputForm {
   login?: boolean;
 }
@@ -42,6 +36,13 @@ export interface InputForm {
 withDefaults(defineProps<InputForm>(), {
   login: false,
 });
+
+const router = useRouter();
+
+function logout() {
+  sessionStorage.removeItem('token');
+  void router.replace('/');
+}
 </script>
 
 <style scoped>
