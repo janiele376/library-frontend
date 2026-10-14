@@ -1,1 +1,79 @@
 /* app global css */
+:root {
+  --bg-page: #e9e4de;
+  --bg-card: #dbc2b0;
+  --bg-input: #ffffff;
+  --bg-input-readonly: #e5d7cc;
+  --bg-modal-backdrop: rgba(85, 70, 60, 0.4);
+
+  --text-main: #55463c;
+  --text-muted: #7a6a5f;
+  --text-contrast: #ffffff;
+
+  --border-color: #55463c;
+  --border-dashed: #7a6a5f;
+
+  --btn-primary-bg: #55463c;
+  --btn-primary-text: #ffffff;
+  --btn-primary-border: #55463c;
+
+  --btn-secondary-bg: #dbc2b0;
+  --btn-secondary-text: #55463c;
+  --btn-secondary-border: #55463c;
+
+  --icon-filter: none;
+}
+
+body.dark-mode {
+  --bg-page: #1e1915;
+  --bg-card: #2c241f;
+  --bg-input: #1e1915;
+  --bg-input-readonly: #251f1a;
+  --bg-modal-backdrop: rgba(0, 0, 0, 0.7);
+
+  --text-main: #e9e4de;
+  --text-muted: #a89587;
+  --text-contrast: #2c241f;
+
+  --border-color: #8a7363;
+  --border-dashed: #8a7363;
+
+  --btn-primary-bg: #dbc2b0;
+  --btn-primary-text: #2c241f;
+  --btn-primary-border: #dbc2b0;
+  --btn-secondary-bg: #3f342d;
+  --btn-secondary-text: #e9e4de;
+  --btn-secondary-border: #8a7363;
+  --icon-filter: invert(90%) brightness(115%) contrast(85%);
+}
+
+body.dark-mode img:not(.img-user) {
+  filter: var(--icon-filter);
+}
+
+body {
+  font-family: Georgia, 'Times New Roman', serif;
+}
+
+.auth-body {
+  background-image: linear-gradient(#ffffff30, #ffffff30), url('../assets/background-corpo.png');
+
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  background-color: var(--bg-page);
+  color: var(--text-main);
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 3rem;
+
+  width: 100%;
+  padding: 3rem 8%;
+}
+
+.dark-mode .auth-body {
+  background-blend-mode: multiply;
+  background-color: #1a1614;
+}
