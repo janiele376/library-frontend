@@ -21,3 +21,15 @@ export function formatDateToISO(value: string): string | null {
 
   return `${String(year).padStart(4, '0')}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 }
+
+export function formatDateToBR(value: string): string {
+  const parts = value.split('-');
+
+  if (parts.length !== 3) {
+    return value;
+  }
+
+  const [year, month, day] = parts;
+
+  return `${day}/${month}/${year}`;
+}

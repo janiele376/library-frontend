@@ -1,23 +1,40 @@
 <template>
   <div class="container-status-cards">
     <div class="card-status card-green">
-      <p class="card-title">Quantidade de Aluguéis em Dia:</p>
-      <h3 class="card-value">{{ onTime }} Aluguéis</h3>
+      <p class="card-title">
+        {{ t('dashboard.status.onTime') }}
+      </p>
+
+      <h3 class="card-value">
+        {{ t('dashboard.status.rentalCount', onTime) }}
+      </h3>
     </div>
 
     <div class="card-status card-yellow">
-      <p class="card-title">Quantidade de Aluguéis Perto de Vencer:</p>
-      <h3 class="card-value">{{ expiring }} Aluguéis</h3>
+      <p class="card-title">
+        {{ t('dashboard.status.nearDue') }}
+      </p>
+
+      <h3 class="card-value">
+        {{ t('dashboard.status.rentalCount', expiring) }}
+      </h3>
     </div>
 
     <div class="card-status card-red">
-      <p class="card-title">Quantidade de Aluguéis em Atraso:</p>
-      <h3 class="card-value">{{ late }} Aluguéis</h3>
+      <p class="card-title">
+        {{ t('dashboard.status.overdue') }}
+      </p>
+
+      <h3 class="card-value">
+        {{ t('dashboard.status.rentalCount', late) }}
+      </h3>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+
 withDefaults(
   defineProps<{
     onTime?: number;
@@ -30,6 +47,8 @@ withDefaults(
     late: 0,
   },
 );
+
+const { t } = useI18n({ useScope: 'global' });
 </script>
 
 <style scoped>

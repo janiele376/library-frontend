@@ -2,13 +2,27 @@
   <div class="dashboard-carousel">
     <div class="list-quantities">
       <div v-for="item in visibleItems" :key="item.bookId" class="item-qty">
-        <span>Livro #{{ item.bookId }}</span>
-        <span>qtd. {{ item.quantity }}</span>
+        <span>
+          {{
+            bookTitles[item.bookId] ??
+            t('dashboard.rentalQuantities.bookFallback', {
+              id: item.bookId,
+            })
+          }}
+        </span>
+
+        <span>
+          {{ t('dashboard.rentalQuantities.quantity') }}
+          {{ item.quantity }}
+        </span>
       </div>
 
       <div v-if="items.length === 0" class="item-qty">
-        <span>Nenhum aluguel computado</span>
-        <span>qtd. 0</span>
+        <span>
+          {{ t('dashboard.rentalQuantities.empty') }}
+        </span>
+
+        <span> {{ t('dashboard.rentalQuantities.quantity') }} 0 </span>
       </div>
     </div>
 
@@ -17,7 +31,7 @@
         type="button"
         class="carousel-arrow"
         :disabled="currentPage === 0"
-        aria-label="Página anterior"
+        :aria-label="t('dashboard.rentalQuantities.previousPage')"
         @click="previousPage"
       >
         &lt;
@@ -30,7 +44,12 @@
           type="button"
           class="dot"
           :class="{ active: currentPage === page - 1 }"
-          :aria-label="`Ir para página ${page}`"
+          :aria-label="
+            t('dashboard.rentalQuantities.goToPage', {
+              page,
+            })
+          "
+          :aria-current="currentPage === page - 1 ? 'page' : undefined"
           @click="currentPage = page - 1"
         />
       </div>
@@ -39,7 +58,7 @@
         type="button"
         class="carousel-arrow"
         :disabled="currentPage === totalPages - 1"
-        aria-label="Próxima página"
+        :aria-label="t('dashboard.rentalQuantities.nextPage')"
         @click="nextPage"
       >
         &gt;
@@ -50,6 +69,9 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
+
+import { getBookById } from '@/services/bookService';
 
 interface CarouselItem {
   bookId: string;
@@ -60,8 +82,12 @@ const props = defineProps<{
   rentals: Record<string, number>;
 }>();
 
+const { t } = useI18n({ useScope: 'global' });
+
 const currentPage = ref(0);
 const itemsPerPage = 3;
+
+const bookTitles = ref<Record<string, string>>({});
 
 const items = computed<CarouselItem[]>(() =>
   Object.entries(props.rentals).map(([bookId, quantity]) => ({
@@ -74,20 +100,52 @@ const totalPages = computed(() => Math.max(1, Math.ceil(items.value.length / ite
 
 const visibleItems = computed(() => {
   const start = currentPage.value * itemsPerPage;
+
   return items.value.slice(start, start + itemsPerPage);
 });
 
-function nextPage() {
+async function loadBookTitles(): Promise<void> {
+  const bookIds = Object.keys(props.rentals);
+
+  const missingIds = bookIds.filter((bookId) => bookTitles.value[bookId] === undefined);
+
+  await Promise.all(
+    missingIds.map(async (bookId) => {
+      try {
+        const book = await getBookById(Number(bookId));
+
+        bookTitles.value[bookId] = book.title;
+      } catch (error) {
+        console.error(`Erro ao buscar o título do livro ${bookId}:`, error);
+
+        // O fallback fica no template para acompanhar
+        // automaticamente o idioma selecionado.
+      }
+    }),
+  );
+}
+
+function nextPage(): void {
   if (currentPage.value < totalPages.value - 1) {
     currentPage.value++;
   }
 }
 
-function previousPage() {
+function previousPage(): void {
   if (currentPage.value > 0) {
     currentPage.value--;
   }
 }
+
+watch(
+  () => props.rentals,
+  () => {
+    currentPage.value = 0;
+
+    void loadBookTitles();
+  },
+  { immediate: true },
+);
 
 watch(totalPages, (pages) => {
   if (currentPage.value >= pages) {

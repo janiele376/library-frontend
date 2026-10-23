@@ -1,33 +1,40 @@
 import { defineBoot } from '#q-app';
 import { createI18n } from 'vue-i18n';
 
-import messages from '@/i18n';
+import messages from '../i18n';
 
-export type MessageLanguages = keyof typeof messages;
-// Type-define 'en-US' as the master schema for the resource
-export type MessageSchema = (typeof messages)['en-US'];
+export type MessageLanguages = 'pt-BR' | 'en-US' | 'es-ES';
 
-// See https://vue-i18n.intlify.dev/guide/advanced/typescript.html#global-resource-schema-type-definition
-/* eslint-disable @typescript-eslint/no-empty-object-type */
-declare module 'vue-i18n' {
-  // define the locale messages schema
-  export interface DefineLocaleMessage extends MessageSchema {}
+const STORAGE_KEY = 'library-language';
 
-  // define the datetime format schema
-  export interface DefineDateTimeFormat {}
+function getSavedLocale(): MessageLanguages {
+  const savedLocale = localStorage.getItem(STORAGE_KEY);
 
-  // define the number format schema
-  export interface DefineNumberFormat {}
+  if (savedLocale === 'pt-BR' || savedLocale === 'en-US' || savedLocale === 'es-ES') {
+    return savedLocale;
+  }
+
+  return 'pt-BR';
 }
-/* eslint-enable @typescript-eslint/no-empty-object-type */
+
+export const i18n = createI18n({
+  legacy: false,
+  locale: getSavedLocale(),
+  fallbackLocale: 'pt-BR',
+  messages,
+  globalInjection: true,
+});
+
+export function changeLanguage(locale: MessageLanguages): void {
+  i18n.global.locale.value = locale;
+
+  localStorage.setItem(STORAGE_KEY, locale);
+
+  document.documentElement.lang = locale;
+}
 
 export default defineBoot(({ app }) => {
-  const i18n = createI18n<{ message: MessageSchema }, MessageLanguages>({
-    locale: 'en-US',
-    legacy: false,
-    messages,
-  });
-
-  // Set i18n instance on app
   app.use(i18n);
+
+  document.documentElement.lang = i18n.global.locale.value;
 });

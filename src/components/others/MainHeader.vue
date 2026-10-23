@@ -1,25 +1,55 @@
 <template>
   <div id="header">
     <div class="container-title">
-      <img class="img-book" src="../assets/book-logo.svg" alt="Logo" />
+      <img
+        class="img-book"
+        src="../../assets/book-logo.svg"
+        :alt="t('header.accessibility.logo')"
+      />
 
-      <h2 class="title" data-translation="header_title">Biblioteca Dashboard</h2>
+      <h2 class="title">
+        {{ t('header.title') }}
+      </h2>
 
-      <div class="container-user-header" v-if="login">
+      <div v-if="login" class="container-user-header">
         <div class="imgs">
-          <img class="img-user" src="../assets/book-logo.svg" alt="Usuário" />
+          <img
+            class="img-user"
+            src="../../assets/book-logo.svg"
+            :alt="t('header.accessibility.userImage')"
+          />
 
-          <q-btn class="img-adjustments" icon="settings" to="/" flat round dense size="20px" />
+          <q-btn
+            class="img-adjustments"
+            icon="settings"
+            to="/settings"
+            flat
+            round
+            dense
+            size="20px"
+            :aria-label="t('header.accessibility.settingsButton')"
+          />
 
-          <q-btn class="img-logout" icon="logout" @click="logout" flat round dense size="20px" />
+          <q-btn
+            class="img-logout"
+            icon="logout"
+            flat
+            round
+            dense
+            size="20px"
+            :aria-label="t('header.accessibility.logoutButton')"
+            @click="logout"
+          />
         </div>
 
         <div class="text">
-          <p id="tenant-logged-name">Usuário</p>
+          <p id="tenant-logged-name">
+            {{ t('header.user') }}
+          </p>
 
-          <p data-translation="nav_settings">Ajustes</p>
+          <p>{{ t('header.settings') }}</p>
 
-          <p data-translation="nav_logout">Sair</p>
+          <p>{{ t('header.logout') }}</p>
         </div>
       </div>
     </div>
@@ -28,6 +58,7 @@
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 
 export interface InputForm {
   login?: boolean;
@@ -38,6 +69,7 @@ withDefaults(defineProps<InputForm>(), {
 });
 
 const router = useRouter();
+const { t } = useI18n();
 
 function logout() {
   sessionStorage.removeItem('token');
@@ -108,6 +140,7 @@ function logout() {
   height: 2.2rem;
   cursor: pointer;
   transition: opacity 0.2s;
+  color: var(--text-main);
 }
 
 #header .container-user-header .imgs .img-adjustments:hover,

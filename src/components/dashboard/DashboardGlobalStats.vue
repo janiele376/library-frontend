@@ -1,27 +1,31 @@
 <template>
   <div class="table-globals">
     <div class="row-global">
-      <span>Aluguéis Realizados</span>
+      <span>{{ t('dashboard.globalStats.rentals') }}</span>
       <span>{{ rentals }}</span>
     </div>
 
     <hr />
 
     <div class="row-global">
-      <span>Livros Cadastrados</span>
+      <span>{{ t('dashboard.globalStats.books') }}</span>
       <span>{{ books }}</span>
     </div>
 
     <hr />
 
     <div class="row-global">
-      <span>Editoras Cadastradas</span>
+      <span>{{ t('dashboard.globalStats.publishers') }}</span>
       <span>{{ publishers }}</span>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n({ useScope: 'global' });
+
 withDefaults(
   defineProps<{
     rentals?: number;

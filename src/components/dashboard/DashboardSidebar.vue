@@ -1,13 +1,32 @@
 <template>
   <nav class="container-menu">
-    <router-link to="/dashboard" class="menu-item active"> Dashboard </router-link>
+    <router-link to="/dashboard" class="menu-item">
+      {{ t('dashboard.sidebar.dashboard') }}
+    </router-link>
 
-    <span class="menu-item">Usuários</span>
-    <span class="menu-item">Aluguéis</span>
-    <span class="menu-item">Livros</span>
-    <span class="menu-item">Editoras</span>
+    <router-link to="/users" class="menu-item">
+      {{ t('dashboard.sidebar.users') }}
+    </router-link>
+
+    <router-link to="/rentals" class="menu-item">
+      {{ t('dashboard.sidebar.rentals') }}
+    </router-link>
+
+    <router-link to="/books" class="menu-item">
+      {{ t('dashboard.sidebar.books') }}
+    </router-link>
+
+    <router-link to="/publishers" class="menu-item">
+      {{ t('dashboard.sidebar.publishers') }}
+    </router-link>
   </nav>
 </template>
+
+<script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n({ useScope: 'global' });
+</script>
 
 <style scoped>
 .container-menu {
@@ -37,7 +56,7 @@
   color: var(--btn-primary-text);
 }
 
-.menu-item.active {
+.menu-item.router-link-exact-active {
   background-color: var(--btn-primary-bg);
   color: var(--btn-primary-text);
   border-color: var(--btn-primary-border);

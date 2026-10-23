@@ -4,6 +4,7 @@
       type="button"
       class="btn-confirmar"
       name="btn-confirmar"
+      no-caps
       :to="action_confirm ? undefined : path_confirm"
       :loading="loading"
       :disable="loading"
@@ -14,7 +15,9 @@
 
     <div class="divider">
       <span></span>
-      <p>ou</p>
+
+      <p>{{ t('components.btnDivider.or') }}</p>
+
       <span></span>
     </div>
 
@@ -22,6 +25,7 @@
       type="button"
       class="btn-cancel"
       name="btn-cancel"
+      no-caps
       :to="action_cancel ? undefined : path_cancel"
       :disable="loading"
       @click="action_cancel?.()"
@@ -32,6 +36,8 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+
 export interface BtnDivider {
   name_confirm?: string;
   name_cancel?: string;
@@ -47,6 +53,8 @@ withDefaults(defineProps<BtnDivider>(), {
   name_cancel: '',
   loading: false,
 });
+
+const { t } = useI18n();
 </script>
 
 <style scoped>
@@ -100,6 +108,7 @@ withDefaults(defineProps<BtnDivider>(), {
 }
 
 .divider p {
+  margin: 0;
   color: var(--text-main);
   font-size: 0.8rem;
 }

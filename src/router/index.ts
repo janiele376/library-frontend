@@ -7,7 +7,7 @@ import {
 } from 'vue-router';
 
 import routes from './routes';
-import { isTokenExpired } from '@/utils/tokenUtils';
+import { useAuthStore } from '@/stores/authStore';
 
 export default defineRouter(() => {
   const createHistory = import.meta.env.QUASAR_SERVER
@@ -23,19 +23,43 @@ export default defineRouter(() => {
   });
 
   Router.beforeEach((to) => {
-    if (!to.matched.some((route) => route.meta.requiresAuth)) {
-      return true;
-    }
+    const authStore = useAuthStore();
 
-    const token = sessionStorage.getItem('token');
+    const authenticated = authStore.restoreSession();
 
-    if (!token || isTokenExpired(token)) {
-      sessionStorage.removeItem('token');
+    const requiresAuth = to.matched.some((route) => route.meta.requiresAuth === true);
 
+    if (requiresAuth && !authenticated) {
       return {
         path: '/',
         replace: true,
       };
+    }
+
+    const isGuestRoute = ['/', '/register', '/forgot-password'].includes(to.path);
+
+    if (authenticated && isGuestRoute) {
+      return {
+        path: '/dashboard',
+        replace: true,
+      };
+    }
+
+    const allowedRoles = to.matched.flatMap((route) => {
+      const roles = route.meta.roles;
+
+      return Array.isArray(roles) ? roles : [];
+    });
+
+    if (allowedRoles.length > 0) {
+      const currentRole = authStore.isAdmin ? 'ROLE_ADMIN' : 'ROLE_USER';
+
+      if (!allowedRoles.includes(currentRole)) {
+        return {
+          path: '/dashboard',
+          replace: true,
+        };
+      }
     }
 
     return true;

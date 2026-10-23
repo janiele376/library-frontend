@@ -1,57 +1,89 @@
 <template>
   <div class="container-phrase">
     <div class="phrase">
-      <h3 class="line1" data-translation="banner_welcome">Bem Vindo(a)</h3>
+      <h2 class="line1">
+        {{ t('auth.phrase.welcome') }}
+      </h2>
 
-      <h1 class="line2" data-translation="banner_line2">A Leitura Abre</h1>
+      <h1 class="line2">
+        {{ t('auth.phrase.line2') }}
+      </h1>
 
-      <h1 class="line3" data-translation="banner_line3">Novos Mundos</h1>
+      <h1 class="line3">
+        {{ t('auth.phrase.line3') }}
+      </h1>
 
-      <h4 class="line4" data-translation="banner_line4">
-        Acesse sua conta e assista a sua experiência
-      </h4>
+      <h3 class="line4">
+        {{ t('auth.phrase.line4') }}
+      </h3>
     </div>
   </div>
 </template>
 
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { useI18n } from 'vue-i18n';
 
-<style lang="css" scoped>
+const { t } = useI18n({ useScope: 'global' });
+</script>
+
+<style scoped>
 .container-phrase {
   flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
 }
 
-.container-phrase .phrase {
+.phrase {
+  width: 100%;
   max-width: 38rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.phrase .line1,
+.phrase .line2,
+.phrase .line3,
+.phrase .line4 {
+  position: static;
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 0;
+  padding: 0;
+  transform: none;
+  text-align: left;
+  letter-spacing: normal;
+  text-shadow: 2px 2px 4px var(--shadow-color);
 }
 
 .container-phrase .phrase .line1 {
-  color: white;
-  font-size: 1.875rem;
-  font-weight: bold;
-  margin-top: -2rem;
-  text-shadow: 2px 2px 4px #000;
+  color: var(--text-light);
+  font-size: clamp(1.3rem, 2.5vw, 1.875rem);
+  font-weight: 700;
+  line-height: 1.3;
 }
 
 .container-phrase .phrase .line2 {
-  color: white;
-  font-size: 3.125rem;
-  font-weight: bold;
-  margin-top: -2rem;
-  text-shadow: 2px 2px 4px #000;
+  color: var(--text-light);
+  font-size: clamp(2rem, 4vw, 3.125rem);
+  font-weight: 700;
+  line-height: 1.15;
 }
 
 .container-phrase .phrase .line3 {
-  color: #dfa782;
-  font-size: 3.125rem;
-  font-weight: bold;
-  margin-top: -2rem;
-  text-shadow: 2px 2px 4px #000;
+  color: var(--text-highlight);
+  font-size: clamp(2rem, 4vw, 3.125rem);
+  font-weight: 700;
+  line-height: 1.15;
 }
 
 .container-phrase .phrase .line4 {
-  font-weight: bold;
-  margin-top: -2rem;
-  text-shadow: 2px 2px 4px #000;
+  color: var(--text-light);
+  font-size: clamp(0.9rem, 1.5vw, 1rem);
+  font-weight: 600;
+  line-height: 1.5;
+  margin-top: 0.5rem;
 }
 </style>

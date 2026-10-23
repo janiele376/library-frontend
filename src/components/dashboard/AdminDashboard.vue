@@ -3,56 +3,76 @@
     <DashboardSidebar />
 
     <section class="container-dashboard-content">
-      <DashboardStatusCards
-        :on-time="dashboard?.onTimeRentals ?? 0"
-        :expiring="dashboard?.nearDueRentals ?? 0"
-        :late="dashboard?.overdueRentals ?? 0"
-      />
-
-      <div class="dashboard-grid">
-        <div class="dashboard-col">
-          <DashboardBox title="Últimos Livros Alugados">
-            <ol v-if="dashboard?.lastRentals?.length" class="list-rented-books">
-              <li v-for="rental in dashboard.lastRentals" :key="rental.rentalId">
-                {{ rental.title }}
-              </li>
-            </ol>
-
-            <ol v-else class="list-rented-books">
-              <li>Nenhum aluguel registrado</li>
-            </ol>
-          </DashboardBox>
-
-          <DashboardBox title="Quantitativos Globais">
-            <DashboardGlobalStats
-              :rentals="dashboard?.totalRentals ?? 0"
-              :books="dashboard?.totalBooks ?? 0"
-              :publishers="dashboard?.totalPublishers ?? 0"
-            />
-          </DashboardBox>
-        </div>
-
-        <div class="dashboard-col">
-          <DashboardBox title="Quantidade de Livros Alugados">
-            <DashboardCarousel :rentals="dashboard?.activeRentalsByBook ?? {}" />
-          </DashboardBox>
-
-          <DashboardBox title="Livro Mais Alugado">
-            <MostRentedBook
-              :title="dashboard?.mostRentedBook?.title ?? '-'"
-              :publisher="dashboard?.mostRentedBook?.publisher ?? '-'"
-              :release-date="dashboard?.mostRentedBook?.releaseDate ?? '-'"
-              :quantity="dashboard?.mostRentedBook?.quantity ?? 0"
-            />
-          </DashboardBox>
-        </div>
+      <div v-if="loading" class="dashboard-feedback">
+        <q-spinner color="primary" size="2.5rem" />
+        <p>{{ t('dashboard.loading') }}</p>
       </div>
+
+      <div v-else-if="error" class="dashboard-feedback">
+        <p>{{ t('dashboard.loadError') }}</p>
+
+        <q-btn
+          :label="t('dashboard.retry')"
+          color="primary"
+          no-caps
+          unelevated
+          @click="loadDashboard"
+        />
+      </div>
+
+      <template v-else-if="dashboard">
+        <DashboardStatusCards
+          :on-time="dashboard.onTimeRentals"
+          :expiring="dashboard.nearDueRentals"
+          :late="dashboard.overdueRentals"
+        />
+
+        <div class="dashboard-grid">
+          <div class="dashboard-col">
+            <DashboardBox :title="t('dashboard.lastRentals.title')">
+              <ol v-if="dashboard.lastRentals.length > 0" class="list-rented-books">
+                <li v-for="rental in dashboard.lastRentals" :key="rental.rentalId">
+                  {{ rental.title }}
+                </li>
+              </ol>
+
+              <ol v-else class="list-rented-books">
+                <li>{{ t('dashboard.lastRentals.empty') }}</li>
+              </ol>
+            </DashboardBox>
+
+            <DashboardBox :title="t('dashboard.globalStats.title')">
+              <DashboardGlobalStats
+                :rentals="dashboard.totalRentals"
+                :books="dashboard.totalBooks"
+                :publishers="dashboard.totalPublishers"
+              />
+            </DashboardBox>
+          </div>
+
+          <div class="dashboard-col">
+            <DashboardBox :title="t('dashboard.rentalQuantities.title')">
+              <DashboardCarousel :rentals="dashboard.activeRentalsByBook" />
+            </DashboardBox>
+
+            <DashboardBox :title="t('dashboard.mostRentedBook.title')">
+              <MostRentedBook
+                :title="dashboard.mostRentedBook?.title ?? '-'"
+                :publisher="dashboard.mostRentedBook?.publisher ?? '-'"
+                :release-date="formatReleaseDate(dashboard.mostRentedBook?.releaseDate)"
+                :quantity="dashboard.mostRentedBook?.quantity ?? 0"
+              />
+            </DashboardBox>
+          </div>
+        </div>
+      </template>
     </section>
   </div>
 </template>
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { Notify } from 'quasar';
 
 import DashboardSidebar from './DashboardSidebar.vue';
@@ -62,23 +82,59 @@ import DashboardGlobalStats from './DashboardGlobalStats.vue';
 import DashboardCarousel from './DashboardCarousel.vue';
 import MostRentedBook from './MostRentedBook.vue';
 
-import { getAdminDashboard } from '../../services/dashboardService';
-import type { AdminDashboardResponse } from '../../types/dashboard';
+import { getAdminDashboard } from '@/services/dashboardService';
+import type { AdminDashboardResponse } from '@/types/dashboard';
+
+const { t } = useI18n({ useScope: 'global' });
 
 const dashboard = ref<AdminDashboardResponse | null>(null);
 
-async function loadDashboard() {
+const loading = ref(false);
+const error = ref<string | null>(null);
+
+function formatReleaseDate(value: string | null | undefined): string {
+  if (!value) {
+    return '-';
+  }
+
+  const parts = value.split('-');
+
+  if (parts.length !== 3) {
+    return value;
+  }
+
+  const [year, month, day] = parts;
+
+  if (!year || !month || !day) {
+    return value;
+  }
+
+  return `${day}/${month}/${year}`;
+}
+
+async function loadDashboard(): Promise<void> {
+  loading.value = true;
+  error.value = null;
+
   try {
     dashboard.value = await getAdminDashboard();
-  } catch {
+  } catch (err) {
+    console.error('Erro ao carregar Dashboard administrativa:', err);
+
+    dashboard.value = null;
+    error.value = t('dashboard.loadError');
     Notify.create({
       type: 'negative',
-      message: 'Erro ao carregar os dados da Dashboard.',
+      message: t('dashboard.loadError'),
     });
+  } finally {
+    loading.value = false;
   }
 }
 
-onMounted(loadDashboard);
+onMounted(() => {
+  void loadDashboard();
+});
 </script>
 
 <style scoped>
@@ -124,5 +180,21 @@ onMounted(loadDashboard);
   margin: 0;
   font-size: 0.9rem;
   line-height: 1.5;
+}
+
+.dashboard-feedback {
+  flex: 1;
+  min-height: 15rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  text-align: center;
+}
+
+.dashboard-feedback p {
+  margin: 0;
+  color: var(--text-main);
 }
 </style>

@@ -2,48 +2,45 @@
   <footer class="footer">
     <div class="container-info">
       <div class="about-us">
-        <h4 data-translation="footer_about_title">Sobre Nós</h4>
+        <h4>{{ t('footer.about.title') }}</h4>
 
-        <p class="text-mobile" data-translation="footer_about_mobile">
-          Criando valor e inspiração desde 2023.
+        <p>
+          {{ t('footer.about.firstLine') }}
         </p>
 
-        <p class="text-computer" data-translation="footer_about_desktop">
-          Criando valor e inspiração desde 2023.<br />
-          Nossa missão é informar você aos seus<br />
-          produtos com praticidade.
+        <p>
+          {{ t('footer.about.secondLine') }}
         </p>
       </div>
 
-      <div class="container-contact-us">
-        <div class="contact-us">
-          <h4 data-translation="footer_contact_title">Contate-Nos</h4>
+      <div class="contact-us">
+        <h4>{{ t('footer.contact.title') }}</h4>
 
-          <ul>
-            <li>biblioteca@gmail.com</li>
-            <li>99 9999-99999</li>
-            <li>biblioteca23</li>
-          </ul>
-        </div>
+        <ul>
+          <li>
+            <q-icon name="email" />
+            <span>biblioteca@gmail.com</span>
+          </li>
 
-        <div class="imgs-contact-us">
-          <q-icon name="email" class="img"></q-icon>
+          <li>
+            <q-icon name="phone" />
+            <span>99 9999-99999</span>
+          </li>
 
-          <q-icon name="phone" class="img"></q-icon>
-
-          <q-icon :name="fabInstagram" class="img"></q-icon>
-        </div>
+          <li>
+            <q-icon :name="fabInstagram" />
+            <span>biblioteca23</span>
+          </li>
+        </ul>
       </div>
 
       <div class="our-locations">
-        <h4 data-translation="footer_locations_title">Nossos Locais</h4>
+        <h4>{{ t('footer.locations.title') }}</h4>
 
         <ul>
-          <li data-translation="location_1">Rua Padre Filho, 263 - Centro</li>
-
-          <li data-translation="location_2">Rua IV, 60 - Paulista</li>
-
-          <li data-translation="location_3">Rua Norte Europeu, 110 - Vale Central</li>
+          <li>Rua Padre Filho, 263 - Centro</li>
+          <li>Rua IV, 60 - Paulista</li>
+          <li>Rua Norte Europeu, 110 - Vale Central</li>
         </ul>
       </div>
     </div>
@@ -51,50 +48,72 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
 import { fabInstagram } from '@quasar/extras/fontawesome-v7';
+
+const { t } = useI18n({ useScope: 'global' });
 </script>
 
 <style scoped>
 .footer {
   width: 100%;
+  background-color: var(--bg-card);
+  color: var(--text-main);
 }
 
-.footer .container-info {
-  background-color: var(--bg-card, #dbc2b0);
-  color: var(--text-main, #55463c);
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 3rem;
-  padding: 2rem 4rem;
+.container-info {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+  gap: 1.5rem;
+  padding: 1.75rem clamp(1.25rem, 5vw, 4rem);
 }
 
 .footer h4 {
-  margin-bottom: 0.5rem;
+  margin: 0 0 0.75rem;
+  color: var(--text-main);
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.about-us p {
+  margin: 0 0 0.35rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
 }
 
 .footer ul {
-  list-style-position: inside;
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
 
-.footer .about-us .text-mobile {
-  display: none;
+.footer li {
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
 }
 
-.footer .about-us .text-computer {
-  display: block;
-}
-
-.container-contact-us {
+.contact-us li {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.65rem;
 }
 
-.imgs-contact-us {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  margin-top: 5.5rem;
+.contact-us .q-icon {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.our-locations li {
+  padding-left: 1rem;
+  position: relative;
+}
+
+.our-locations li::before {
+  content: '•';
+  position: absolute;
+  left: 0;
 }
 </style>

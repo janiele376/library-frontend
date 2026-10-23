@@ -41,3 +41,16 @@ export interface AdminDashboardResponse {
   availableBooks: DashboardPage<DashboardBook>;
   activeRentalsByBook: Record<string, number>;
 }
+
+export interface UserDashboardResponse {
+  lastRentals: DashboardRental[];
+  onTimeRentals: number;
+  nearDueRentals: number;
+  overdueRentals: number;
+
+  mostRentedBook: string | null;
+
+  mostRentedBookDetails?: MostRentedBook | null;
+
+  availableBooks: DashboardPage<DashboardBook>;
+}

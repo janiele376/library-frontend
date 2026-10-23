@@ -2,34 +2,45 @@
   <div class="most-rented-content">
     <div class="book-info-text">
       <p>
-        <strong>Título do Livro:</strong>
+        <strong>
+          {{ t('dashboard.mostRentedBook.bookTitle') }}
+        </strong>
         <span>{{ title }}</span>
       </p>
 
       <p>
-        <strong>Editora:</strong>
+        <strong>
+          {{ t('dashboard.mostRentedBook.publisher') }}
+        </strong>
         <span>{{ publisher }}</span>
       </p>
 
       <p>
-        <strong>Data de Lançamento:</strong>
+        <strong>
+          {{ t('dashboard.mostRentedBook.releaseDate') }}
+        </strong>
         <span>{{ releaseDate }}</span>
       </p>
 
       <p>
-        <strong>Quantidade:</strong>
+        <strong>
+          {{ t('dashboard.mostRentedBook.totalRentals') }}
+        </strong>
         <span>{{ quantity }}</span>
       </p>
     </div>
 
     <div v-if="cover && !imageError" class="book-cover">
-      <img :src="cover" alt="Capa do livro" @error="imageError = true" />
+      <img :src="cover" :alt="t('dashboard.mostRentedBook.coverAlt')" @error="imageError = true" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n({ useScope: 'global' });
 
 const props = withDefaults(
   defineProps<{
