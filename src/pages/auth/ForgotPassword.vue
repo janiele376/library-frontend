@@ -160,7 +160,9 @@ import axios from 'axios';
 
 import PhraseLibrary from '@/components/auth/PhraseLibrary.vue';
 import BtnDivider from '@/components/others/BtnDivider.vue';
+
 import { forgotPassword } from '@/services/authService';
+import { isValidEmail } from '@/utils/userValidators';
 
 const $q = useQuasar();
 const router = useRouter();
@@ -187,9 +189,8 @@ async function btnForgotPassword() {
   }
 
   const formattedEmail = email.value.trim().toLowerCase();
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-  if (!emailRegex.test(formattedEmail)) {
+  if (!isValidEmail(formattedEmail)) {
     $q.notify({
       type: 'negative',
       message: t('auth.forgotPassword.messages.invalidEmail'),

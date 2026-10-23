@@ -17,9 +17,8 @@
             dense
             :placeholder="t('settings.edit.supportEmailPlaceholder')"
             :rules="[
-              (value) => !!value || t('settings.edit.required'),
-              (value) =>
-                /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value)) || t('settings.edit.invalidEmail'),
+              (value) => !!String(value ?? '').trim() || t('settings.edit.required'),
+              (value) => isValidEmail(String(value ?? '')) || t('settings.edit.invalidEmail'),
             ]"
           />
 
@@ -30,7 +29,7 @@
             type="textarea"
             outlined
             :placeholder="t('settings.edit.supportMessagePlaceholder')"
-            :rules="[(value) => !!value || t('settings.edit.required')]"
+            :rules="[(value) => !!String(value ?? '').trim() || t('settings.edit.required')]"
           />
         </q-card-section>
 
@@ -61,8 +60,13 @@ import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useQuasar } from 'quasar';
 
+import { isValidEmail } from '@/utils/userValidators';
+
 const props = defineProps<{ modelValue: boolean }>();
-const emit = defineEmits<{ 'update:modelValue': [value: boolean] }>();
+
+const emit = defineEmits<{
+  'update:modelValue': [value: boolean];
+}>();
 
 const { t } = useI18n({ useScope: 'global' });
 const $q = useQuasar();

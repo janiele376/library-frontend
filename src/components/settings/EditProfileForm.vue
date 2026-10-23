@@ -105,7 +105,7 @@
   </template>
 
   <div v-else class="profile-loading">
-    <q-btn flat no-caps icon="refresh" label="Tentar novamente" @click="loadProfile" />
+    <q-btn flat no-caps icon="refresh" :label="t('settings.edit.retry')" @click="loadProfile" />
   </div>
 
   <SupportModal v-model="supportOpen" />
@@ -120,12 +120,23 @@ import axios from 'axios';
 
 import SupportModal from './SupportModal.vue';
 import defaultAvatar from '@/assets/book-logo.svg';
+
 import { useAuthStore } from '@/stores/authStore';
 import { getMyProfile, updateMyProfile } from '@/services/userService';
+
+import {
+  isValidFullName,
+  isValidEmail,
+  isValidPhone,
+  isValidAddress,
+} from '@/utils/userValidators.js';
+
+import { formatDateToBR } from '@/utils/dateUtils';
 
 import type { UserResponse, UpdateUserRequest } from '@/types/user';
 
 type ProfileField = 'email' | 'phone' | 'birthDate' | 'cpf' | 'address';
+
 type PasswordField = 'currentPassword' | 'newPassword' | 'confirmPassword';
 
 const router = useRouter();
@@ -157,8 +168,16 @@ const profileFields: {
   icon: string;
   readonly?: boolean;
 }[] = [
-  { key: 'email', label: 'settings.email', icon: 'mail_outline' },
-  { key: 'phone', label: 'settings.phone', icon: 'phone' },
+  {
+    key: 'email',
+    label: 'settings.email',
+    icon: 'mail_outline',
+  },
+  {
+    key: 'phone',
+    label: 'settings.phone',
+    icon: 'phone',
+  },
   {
     key: 'birthDate',
     label: 'settings.birthDate',
@@ -171,7 +190,11 @@ const profileFields: {
     icon: 'badge',
     readonly: true,
   },
-  { key: 'address', label: 'settings.address', icon: 'location_on' },
+  {
+    key: 'address',
+    label: 'settings.address',
+    icon: 'location_on',
+  },
 ];
 
 const passwordFields: {
@@ -198,16 +221,11 @@ const visiblePasswords = reactive<Record<PasswordField, boolean>>({
   confirmPassword: false,
 });
 
-function formatDate(value: string): string {
-  const parts = value.split('-');
-
-  if (parts.length !== 3) {
-    return value;
-  }
-
-  const [year, month, day] = parts;
-
-  return `${day}/${month}/${year}`;
+function notifyError(message: string): void {
+  $q.notify({
+    type: 'negative',
+    message,
+  });
 }
 
 async function loadProfile(): Promise<void> {
@@ -227,7 +245,7 @@ async function loadProfile(): Promise<void> {
     form.nameCompleted = user.nameCompleted;
     form.email = user.email;
     form.phone = user.phone;
-    form.birthDate = formatDate(user.dateBirth);
+    form.birthDate = formatDateToBR(user.dateBirth);
     form.cpf = user.cpf;
     form.address = user.address;
 
@@ -236,11 +254,10 @@ async function loadProfile(): Promise<void> {
     form.confirmPassword = '';
 
     loaded.value = true;
-  } catch {
-    $q.notify({
-      type: 'negative',
-      message: 'Não foi possível carregar as informações do perfil.',
-    });
+  } catch (error) {
+    console.error('Erro ao carregar perfil:', error);
+
+    notifyError(t('settings.edit.loadError'));
   } finally {
     loading.value = false;
   }
@@ -250,27 +267,18 @@ async function save(): Promise<void> {
   if (saving.value || !originalUser.value) return;
 
   if (!form.currentPassword) {
-    $q.notify({
-      type: 'negative',
-      message: t('settings.edit.currentPasswordRequired'),
-    });
+    notifyError(t('settings.edit.currentPasswordRequired'));
     return;
   }
 
   if (form.currentPassword.length < 8) {
-    $q.notify({
-      type: 'negative',
-      message: 'A senha atual deve ter pelo menos 8 caracteres.',
-    });
+    notifyError(t('settings.edit.currentPasswordMinLength'));
     return;
   }
 
   if (form.newPassword || form.confirmPassword) {
     if (form.newPassword.length < 8 || form.newPassword !== form.confirmPassword) {
-      $q.notify({
-        type: 'negative',
-        message: t('settings.edit.passwordMismatch'),
-      });
+      notifyError(t('settings.edit.passwordMismatch'));
       return;
     }
   }
@@ -280,39 +288,35 @@ async function save(): Promise<void> {
   const phone = form.phone.trim();
   const address = form.address.trim();
 
-  if (
-    nameCompleted.length < 3 ||
-    nameCompleted.length > 150 ||
-    !/^[a-zA-ZÀ-ÿ]+(?:\s+[a-zA-ZÀ-ÿ]+)+$/.test(nameCompleted)
-  ) {
-    $q.notify({
-      type: 'negative',
-      message: 'Informe nome e sobrenome válidos.',
-    });
+  if (!isValidFullName(nameCompleted)) {
+    notifyError(t('settings.edit.invalidFullName'));
     return;
   }
 
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    $q.notify({
-      type: 'negative',
-      message: 'Informe um e-mail válido.',
-    });
+  if (!isValidEmail(email)) {
+    notifyError(t('settings.edit.invalidEmail'));
     return;
   }
 
-  if (!/^\(\d{2}\)\s9\d{4}-\d{4}$/.test(phone)) {
-    $q.notify({
-      type: 'negative',
-      message: 'O telefone deve seguir o formato (85) 99999-9999.',
-    });
+  if (!isValidPhone(phone)) {
+    notifyError(t('settings.edit.invalidPhone'));
+    return;
+  }
+
+  if (!isValidAddress(address)) {
+    notifyError(t('settings.edit.invalidAddress'));
     return;
   }
 
   const data: UpdateUserRequest = {
     nameCompleted: nameCompleted !== originalUser.value.nameCompleted ? nameCompleted : null,
+
     email: email !== originalUser.value.email ? email : null,
+
     phone: phone !== originalUser.value.phone ? phone : null,
+
     address: address !== originalUser.value.address ? address : null,
+
     password: form.newPassword || null,
     currentPassword: form.currentPassword,
   };
@@ -327,7 +331,7 @@ async function save(): Promise<void> {
 
     $q.notify({
       type: 'positive',
-      message: 'Informações atualizadas com sucesso!',
+      message: t('settings.edit.updateSuccess'),
     });
 
     if (emailChanged || passwordChanged) {
@@ -342,36 +346,18 @@ async function save(): Promise<void> {
       const status = error.response?.status;
 
       if (status === 400) {
-        $q.notify({
-          type: 'negative',
-          message: 'Senha atual inválida ou dados incorretos.',
-        });
+        notifyError(t('settings.edit.invalidCurrentPassword'));
       } else if (status === 409) {
-        $q.notify({
-          type: 'negative',
-          message: 'Este e-mail já está sendo utilizado.',
-        });
+        notifyError(t('settings.edit.emailAlreadyInUse'));
       } else if (status === 403) {
-        $q.notify({
-          type: 'negative',
-          message: 'Você não tem permissão para alterar este perfil.',
-        });
+        notifyError(t('settings.edit.permissionDenied'));
       } else if (!error.response) {
-        $q.notify({
-          type: 'negative',
-          message: t('auth.login.messages.connectionError'),
-        });
+        notifyError(t('auth.login.messages.connectionError'));
       } else {
-        $q.notify({
-          type: 'negative',
-          message: t('auth.login.messages.unexpectedError'),
-        });
+        notifyError(t('auth.login.messages.unexpectedError'));
       }
     } else {
-      $q.notify({
-        type: 'negative',
-        message: t('auth.login.messages.unexpectedError'),
-      });
+      notifyError(t('auth.login.messages.unexpectedError'));
     }
   } finally {
     saving.value = false;

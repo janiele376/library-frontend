@@ -4,9 +4,9 @@
 
     <p>{{ rental.bookName }}</p>
 
-    <p>{{ formatDate(rental.startDate) }}</p>
+    <p>{{ formatDateToBR(rental.startDate) }}</p>
 
-    <p>{{ formatDate(rental.endDate) }}</p>
+    <p>{{ formatDateToBR(rental.endDate) }}</p>
 
     <div class="status-container">
       <span class="status" :class="rental.status">
@@ -43,6 +43,7 @@ import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import type { RentalData } from '@/types/rentals';
+import { formatDateToBR } from '@/utils/dateUtils';
 
 const props = defineProps<{
   rental: RentalData;
@@ -53,19 +54,9 @@ const emit = defineEmits<{
   return: [];
 }>();
 
-const { t } = useI18n();
+const { t } = useI18n({ useScope: 'global' });
 
 const isReturned = computed(() => props.rental.status === 'returned');
-
-function formatDate(date: string): string {
-  const [year, month, day] = date.split('-');
-
-  if (!year || !month || !day) {
-    return date;
-  }
-
-  return `${day}/${month}/${year}`;
-}
 </script>
 
 <style scoped>

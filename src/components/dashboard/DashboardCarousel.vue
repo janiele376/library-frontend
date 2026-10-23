@@ -117,9 +117,6 @@ async function loadBookTitles(): Promise<void> {
         bookTitles.value[bookId] = book.title;
       } catch (error) {
         console.error(`Erro ao buscar o título do livro ${bookId}:`, error);
-
-        // O fallback fica no template para acompanhar
-        // automaticamente o idioma selecionado.
       }
     }),
   );

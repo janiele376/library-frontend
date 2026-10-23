@@ -84,6 +84,7 @@ import MostRentedBook from './MostRentedBook.vue';
 
 import { getAdminDashboard } from '@/services/dashboardService';
 import type { AdminDashboardResponse } from '@/types/dashboard';
+import { formatDateToBR } from '@/utils/dateUtils';
 
 const { t } = useI18n({ useScope: 'global' });
 
@@ -93,23 +94,7 @@ const loading = ref(false);
 const error = ref<string | null>(null);
 
 function formatReleaseDate(value: string | null | undefined): string {
-  if (!value) {
-    return '-';
-  }
-
-  const parts = value.split('-');
-
-  if (parts.length !== 3) {
-    return value;
-  }
-
-  const [year, month, day] = parts;
-
-  if (!year || !month || !day) {
-    return value;
-  }
-
-  return `${day}/${month}/${year}`;
+  return value ? formatDateToBR(value) : '-';
 }
 
 async function loadDashboard(): Promise<void> {
@@ -123,6 +108,7 @@ async function loadDashboard(): Promise<void> {
 
     dashboard.value = null;
     error.value = t('dashboard.loadError');
+
     Notify.create({
       type: 'negative',
       message: t('dashboard.loadError'),

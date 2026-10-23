@@ -52,6 +52,8 @@ import axios from 'axios';
 import defaultAvatar from '@/assets/book-logo.svg';
 import { useAuthStore } from '@/stores/authStore';
 import { getMyProfile } from '@/services/userService';
+import { formatDateToBR } from '@/utils/dateUtils';
+
 import type { UserResponse } from '@/types/user';
 
 const router = useRouter();
@@ -61,18 +63,6 @@ const authStore = useAuthStore();
 
 const user = ref<UserResponse | null>(null);
 const loading = ref(false);
-
-function formatDate(value: string): string {
-  const parts = value.split('-');
-
-  if (parts.length !== 3) {
-    return value;
-  }
-
-  const [year, month, day] = parts;
-
-  return `${day}/${month}/${year}`;
-}
 
 const profileFields = computed(() => {
   if (!user.value) {
@@ -96,7 +86,7 @@ const profileFields = computed(() => {
       key: 'birthDate',
       label: 'settings.birthDate',
       icon: 'calendar_month',
-      value: formatDate(user.value.dateBirth),
+      value: formatDateToBR(user.value.dateBirth),
     },
     {
       key: 'cpf',

@@ -17,7 +17,9 @@
       <div class="container-form">
         <template v-if="mode === 'create'">
           <div class="input-group">
-            <label for="rental-user-id">ID do usuário</label>
+            <label for="rental-user-id">
+              {{ t('rentals.formExtra.userId') }}
+            </label>
 
             <q-input
               id="rental-user-id"
@@ -31,7 +33,9 @@
           </div>
 
           <div class="input-group">
-            <label for="rental-book-id">ID do livro</label>
+            <label for="rental-book-id">
+              {{ t('rentals.formExtra.bookId') }}
+            </label>
 
             <q-input
               id="rental-book-id"
@@ -116,13 +120,15 @@ import { createRental, renewRental, returnRental } from '@/services/rentalServic
 
 import type { RentalData } from '@/types/rentals';
 
+import { getTodayISO, addDaysToISO } from '@/utils/dateUtils';
+
 type ModalMode = 'create' | 'renew' | 'return';
 
 const emit = defineEmits<{
   saved: [];
 }>();
 
-const { t } = useI18n();
+const { t } = useI18n({ useScope: 'global' });
 const $q = useQuasar();
 
 const isOpen = ref(false);
@@ -153,24 +159,10 @@ const displayDate = computed(() => {
   }
 
   if (mode.value === 'renew') {
-    const [year, month, day] = selectedRental.value.endDate.split('-').map(Number);
-
-    if (!year || !month || !day) {
-      return '';
-    }
-
-    const date = new Date(Date.UTC(year, month - 1, day));
-    date.setUTCDate(date.getUTCDate() + 14);
-
-    return date.toISOString().slice(0, 10);
+    return addDaysToISO(selectedRental.value.endDate, 14);
   }
 
-  const today = new Date();
-  const year = today.getFullYear();
-  const month = String(today.getMonth() + 1).padStart(2, '0');
-  const day = String(today.getDate()).padStart(2, '0');
-
-  return `${year}-${month}-${day}`;
+  return getTodayISO();
 });
 
 function openCreateModal() {
@@ -210,16 +202,16 @@ async function confirmAction() {
     const { usersId, booksId } = form.value;
 
     if (
-      !Number.isSafeInteger(usersId) ||
-      !Number.isSafeInteger(booksId) ||
       usersId === null ||
       booksId === null ||
+      !Number.isSafeInteger(usersId) ||
+      !Number.isSafeInteger(booksId) ||
       usersId <= 0 ||
       booksId <= 0
     ) {
       $q.notify({
         type: 'negative',
-        message: 'Informe IDs válidos para o usuário e o livro.',
+        message: t('rentals.messages.invalidIds'),
       });
 
       return;
@@ -242,7 +234,7 @@ async function confirmAction() {
       const rentalId = Number(rental.id);
 
       if (!Number.isSafeInteger(rentalId) || rentalId <= 0) {
-        throw new Error('ID do empréstimo inválido.');
+        throw new Error(t('rentals.messages.invalidRentalId'));
       }
 
       if (mode.value === 'renew') {
@@ -254,7 +246,7 @@ async function confirmAction() {
 
     $q.notify({
       type: 'positive',
-      message: 'Operação realizada com sucesso!',
+      message: t('rentals.messages.operationSuccess'),
     });
 
     isOpen.value = false;
@@ -264,7 +256,7 @@ async function confirmAction() {
 
     $q.notify({
       type: 'negative',
-      message: 'Não foi possível concluir a operação. Confira os dados.',
+      message: t('rentals.messages.operationError'),
     });
   } finally {
     saving.value = false;
