@@ -53,10 +53,8 @@
 </template>
 
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useQuasar } from 'quasar';
-import axios from 'axios';
 
 import DashboardSidebar from '@/components/dashboard/DashboardSidebar.vue';
 import SearchInput from '@/components/others/SearchInput.vue';
@@ -65,88 +63,23 @@ import PaginationControls from '@/components/others/PaginationControls.vue';
 import PublisherTableRow from '@/components/publishers/PublisherTableRow.vue';
 import PublisherFormModal from '@/components/publishers/PublisherFormModal.vue';
 
+import { usePublishers } from '@/composables/publishers/usePublishers';
+
 import type { PublisherResponse } from '@/types/publishers';
 
-import { getPublishers, deletePublisher } from '@/services/publisherService';
-
 const { t } = useI18n({ useScope: 'global' });
-const $q = useQuasar();
 
 const publisherFormModal = ref<InstanceType<typeof PublisherFormModal> | null>(null);
 
-const publishers = ref<PublisherResponse[]>([]);
-const searchTerm = ref('');
-
-const currentPage = ref(1);
-const totalPages = ref(1);
-
-const loading = ref(false);
-const pageSize = 5;
-
-let searchTimeout: ReturnType<typeof setTimeout> | null = null;
-let requestId = 0;
-
-async function loadPublishers(): Promise<void> {
-  const currentRequest = ++requestId;
-  loading.value = true;
-
-  try {
-    const response = await getPublishers(currentPage.value - 1, pageSize, searchTerm.value);
-
-    if (currentRequest !== requestId) return;
-
-    publishers.value = response.content;
-    totalPages.value = Math.max(response.totalPages, 1);
-
-    if (currentPage.value > totalPages.value) {
-      currentPage.value = totalPages.value;
-    }
-  } catch {
-    if (currentRequest !== requestId) return;
-
-    $q.notify({
-      type: 'negative',
-      message: t('publishers.messages.loadError'),
-    });
-  } finally {
-    if (currentRequest === requestId) {
-      loading.value = false;
-    }
-  }
-}
-
-watch(currentPage, () => {
-  void loadPublishers();
-});
-
-watch(searchTerm, () => {
-  if (searchTimeout !== null) {
-    clearTimeout(searchTimeout);
-  }
-
-  searchTimeout = setTimeout(() => {
-    searchTimeout = null;
-
-    if (currentPage.value !== 1) {
-      currentPage.value = 1;
-    } else {
-      void loadPublishers();
-    }
-  }, 400);
-});
-
-onMounted(() => {
-  void loadPublishers();
-});
-
-onBeforeUnmount(() => {
-  ++requestId;
-
-  if (searchTimeout !== null) {
-    clearTimeout(searchTimeout);
-    searchTimeout = null;
-  }
-});
+const {
+  publishers,
+  searchTerm,
+  currentPage,
+  totalPages,
+  loading,
+  loadPublishers,
+  confirmDeletePublisher,
+} = usePublishers();
 
 function openCreateModal(): void {
   publisherFormModal.value?.openCreateModal();
@@ -156,55 +89,9 @@ function openEditModal(publisher: PublisherResponse): void {
   publisherFormModal.value?.openEditModal(publisher);
 }
 
-function confirmDeletePublisher(publisher: PublisherResponse): void {
-  $q.dialog({
-    title: t('publishers.deleteDialog.title'),
-    message: t('publishers.deleteDialog.message', {
-      name: publisher.name,
-    }),
-    cancel: {
-      label: t('publishers.deleteDialog.cancel'),
-      flat: true,
-      noCaps: true,
-    },
-    ok: {
-      label: t('publishers.deleteDialog.confirm'),
-      color: 'negative',
-      unelevated: true,
-      noCaps: true,
-    },
-    persistent: true,
-  }).onOk(() => {
-    void removePublisher(publisher.id);
-  });
-}
-
-async function removePublisher(id: number): Promise<void> {
-  try {
-    await deletePublisher(id);
-
-    $q.notify({
-      type: 'positive',
-      message: t('publishers.messages.deleteSuccess'),
-    });
-
-    await loadPublishers();
-  } catch (error: unknown) {
-    if (axios.isAxiosError(error) && error.response?.status === 409) {
-      $q.notify({
-        type: 'negative',
-        message: t('publishers.messages.deleteConflict'),
-      });
-
-      return;
-    }
-
-    $q.notify({
-      type: 'negative',
-      message: t('publishers.messages.deleteError'),
-    });
-  }
-}
+onMounted(() => {
+  void loadPublishers();
+});
 </script>
 
 <style scoped>

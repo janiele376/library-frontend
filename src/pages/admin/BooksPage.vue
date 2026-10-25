@@ -65,7 +65,6 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
-import { useQuasar } from 'quasar';
 import { useI18n } from 'vue-i18n';
 
 import DashboardSidebar from '@/components/dashboard/DashboardSidebar.vue';
@@ -75,28 +74,25 @@ import PaginationControls from '@/components/others/PaginationControls.vue';
 import BookTableRow from '@/components/books/BookTableRow.vue';
 import BookFormModal from '@/components/books/BookFormModal.vue';
 
-import { useBooks } from '@/composables/useBooks';
-import { getPublisherOptions } from '@/services/publisherService';
+import { useBooks } from '@/composables/books/useBooks';
 import { formatDateToBR } from '@/utils/dateUtils';
 
 import type { BookResponse } from '@/types/books';
-import type { PublisherOption } from '@/types/publishers';
 
-const $q = useQuasar();
 const { t } = useI18n({ useScope: 'global' });
 
 const bookFormModal = ref<InstanceType<typeof BookFormModal> | null>(null);
 
-const publishers = ref<PublisherOption[]>([]);
-
 const {
   books,
+  publishers,
   search,
   currentPage,
   totalPages,
   loading,
   saving,
   loadBooks,
+  loadPublishers,
   confirmDeleteBook,
   handleCreateBook,
   handleUpdateBook,
@@ -105,17 +101,6 @@ const {
     bookFormModal.value?.closeAfterSave();
   },
 });
-
-async function loadPublishers(): Promise<void> {
-  try {
-    publishers.value = await getPublisherOptions();
-  } catch {
-    $q.notify({
-      type: 'negative',
-      message: t('books.page.loadPublishersError'),
-    });
-  }
-}
 
 function openCreateModal(): void {
   bookFormModal.value?.openCreateModal();

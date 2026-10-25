@@ -56,7 +56,7 @@ import PaginationControls from '@/components/others/PaginationControls.vue';
 import UserTableRow from '@/components/users/UserTableRow.vue';
 import EditUserModal from '@/components/users/EditUserModal.vue';
 
-import { useUsers } from '@/composables/useUsers';
+import { useUsers } from '@/composables/users/useUsers';
 
 const { t } = useI18n({ useScope: 'global' });
 

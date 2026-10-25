@@ -44,9 +44,8 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useQuasar } from 'quasar';
 
 import DashboardSidebar from '@/components/dashboard/DashboardSidebar.vue';
 import SearchInput from '@/components/others/SearchInput.vue';
@@ -55,127 +54,28 @@ import PaginationControls from '@/components/others/PaginationControls.vue';
 import RentalTableRow from '@/components/rentals/RentalTableRow.vue';
 import RentalFormModal from '@/components/rentals/RentalFormModal.vue';
 
-import { getRentals } from '@/services/rentalService';
-import { getUserById, getUsers } from '@/services/userService';
-import { getBookById, getBooks } from '@/services/bookService';
+import { useRentals } from '@/composables/rentals/useRentals';
 
-import { mapRentalStatus } from '@/types/rentals';
-import type { RentalData, RentalResponse } from '@/types/rentals';
+import type { RentalData } from '@/types/rentals';
 
-const { t } = useI18n();
-const $q = useQuasar();
+const { t } = useI18n({ useScope: 'global' });
 
 const rentalFormModal = ref<InstanceType<typeof RentalFormModal> | null>(null);
 
-const rentals = ref<RentalData[]>([]);
-const searchTerm = ref('');
-const currentPage = ref(1);
-const totalPages = ref(1);
+const { rentals, searchTerm, currentPage, totalPages, users, books, loadRentals, loadOptions } =
+  useRentals();
 
-const users = ref<{ id: number; name: string; cpf: string }[]>([]);
-
-const books = ref<{ id: number; name: string; code: string }[]>([]);
-
-let searchTimeout: ReturnType<typeof setTimeout> | undefined;
-let requestVersion = 0;
-
-async function loadRentals() {
-  const version = ++requestVersion;
-
-  try {
-    const search = searchTerm.value.trim();
-
-    const response = await getRentals(currentPage.value - 1, 5, search || undefined, undefined);
-
-    const mapped = await Promise.all(
-      response.content.map(async (rental: RentalResponse) => {
-        const [user, book] = await Promise.all([
-          getUserById(rental.usersId),
-          getBookById(rental.booksId),
-        ]);
-
-        return {
-          id: String(rental.id),
-          userName: user.nameCompleted,
-          cpf: user.cpf,
-          bookName: book.title,
-          bookCode: String(book.id),
-          startDate: rental.startDate,
-          endDate: rental.endDate,
-          status: mapRentalStatus(rental.status),
-        } satisfies RentalData;
-      }),
-    );
-
-    if (version !== requestVersion) return;
-
-    rentals.value = mapped;
-    totalPages.value = Math.max(1, response.totalPages);
-  } catch (error) {
-    if (version !== requestVersion) return;
-
-    console.error('Erro ao carregar aluguéis:', error);
-
-    $q.notify({
-      type: 'negative',
-      message: 'Não foi possível carregar os empréstimos.',
-    });
-  }
-}
-
-async function loadOptions() {
-  try {
-    const [usersResponse, booksResponse] = await Promise.all([
-      getUsers({ page: 0, size: 100 }),
-      getBooks({ page: 0, size: 100 }),
-    ]);
-
-    users.value = usersResponse.content.map((user) => ({
-      id: user.id,
-      name: user.nameCompleted,
-      cpf: user.cpf,
-    }));
-
-    books.value = booksResponse.content.map((book) => ({
-      id: book.id,
-      name: book.title,
-      code: String(book.id),
-    }));
-  } catch (error) {
-    console.error('Erro ao carregar usuários e livros:', error);
-
-    $q.notify({
-      type: 'negative',
-      message: 'Não foi possível carregar usuários e livros.',
-    });
-  }
-}
-
-function openCreateModal() {
+function openCreateModal(): void {
   rentalFormModal.value?.openCreateModal();
 }
 
-function openRenewModal(rental: RentalData) {
+function openRenewModal(rental: RentalData): void {
   rentalFormModal.value?.openRenewModal(rental);
 }
 
-function openReturnModal(rental: RentalData) {
+function openReturnModal(rental: RentalData): void {
   rentalFormModal.value?.openReturnModal(rental);
 }
-
-watch(currentPage, () => {
-  void loadRentals();
-});
-
-watch(searchTerm, () => {
-  currentPage.value = 1;
-
-  if (searchTimeout) clearTimeout(searchTimeout);
-
-  searchTimeout = setTimeout(() => {
-    void loadRentals();
-  }, 400);
-});
 
 onMounted(() => {
   void loadRentals();

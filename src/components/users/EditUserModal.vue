@@ -49,7 +49,7 @@ import { useI18n } from 'vue-i18n';
 import { useQuasar } from 'quasar';
 
 import EditUserForm from '@/components/users/EditUserForm.vue';
-import { useEditUser } from '@/composables/useEditUser';
+import { useEditUser } from '@/composables/users/useEditUser';
 
 const { t } = useI18n({ useScope: 'global' });
 const $q = useQuasar();

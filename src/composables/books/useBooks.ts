@@ -4,8 +4,10 @@ import { useI18n } from 'vue-i18n';
 import axios from 'axios';
 
 import { getBooks, createBook, updateBook, deleteBook } from '@/services/bookService';
+import { getPublisherOptions } from '@/services/publisherService';
 
 import type { BookResponse, CreateBookRequest, UpdateBookRequest } from '@/types/books';
+import type { PublisherOption } from '@/types/publishers';
 
 interface UseBooksOptions {
   onSaved?: () => void;
@@ -16,6 +18,7 @@ export function useBooks(options: UseBooksOptions = {}) {
   const { t } = useI18n({ useScope: 'global' });
 
   const books = ref<BookResponse[]>([]);
+  const publishers = ref<PublisherOption[]>([]);
   const search = ref<string | null>('');
   const currentPage = ref(1);
   const totalPages = ref(1);
@@ -67,6 +70,17 @@ export function useBooks(options: UseBooksOptions = {}) {
       if (requestId === requestSequence) {
         loading.value = false;
       }
+    }
+  }
+
+  async function loadPublishers(): Promise<void> {
+    try {
+      publishers.value = await getPublisherOptions();
+    } catch {
+      $q.notify({
+        type: 'negative',
+        message: t('books.page.loadPublishersError'),
+      });
     }
   }
 
@@ -246,6 +260,7 @@ export function useBooks(options: UseBooksOptions = {}) {
 
   return {
     books,
+    publishers,
     search,
     currentPage,
     totalPages,
@@ -253,6 +268,7 @@ export function useBooks(options: UseBooksOptions = {}) {
     saving,
     deleting,
     loadBooks,
+    loadPublishers,
     handleCreateBook,
     handleUpdateBook,
     confirmDeleteBook,

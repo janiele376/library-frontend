@@ -35,6 +35,13 @@
             autocomplete="email"
             dense
             outlined
+            hide-bottom-space
+            :error="submitted && !isValidEmail(email)"
+            :error-message="
+              !email.trim()
+                ? t('auth.forgotPassword.validation.emailRequired')
+                : t('auth.forgotPassword.messages.invalidEmail')
+            "
           >
             <template #prepend>
               <q-icon name="email" />
@@ -56,6 +63,13 @@
             :placeholder="t('auth.forgotPassword.cpfPlaceholder')"
             dense
             outlined
+            hide-bottom-space
+            :error="submitted && !isValidCpfLength(cpf)"
+            :error-message="
+              !cpf.trim()
+                ? t('auth.forgotPassword.validation.cpfRequired')
+                : t('auth.forgotPassword.messages.invalidCpf')
+            "
           >
             <template #prepend>
               <q-icon name="badge" />
@@ -77,6 +91,9 @@
             autocomplete="new-password"
             dense
             outlined
+            hide-bottom-space
+            :error="submitted && !password"
+            :error-message="t('auth.forgotPassword.validation.passwordRequired')"
           >
             <template #prepend>
               <q-icon name="lock" />
@@ -89,7 +106,9 @@
                 role="button"
                 tabindex="0"
                 :aria-label="
-                  showPassword ? t('settings.edit.confirmPassword') : t('settings.edit.newPassword')
+                  showPassword
+                    ? t('components.mainInput.password.hide')
+                    : t('components.mainInput.password.show')
                 "
                 :aria-pressed="showPassword"
                 @click="showPassword = !showPassword"
@@ -114,6 +133,13 @@
             autocomplete="new-password"
             dense
             outlined
+            hide-bottom-space
+            :error="submitted && (!confirmPassword || password !== confirmPassword)"
+            :error-message="
+              !confirmPassword
+                ? t('auth.forgotPassword.validation.confirmPasswordRequired')
+                : t('auth.forgotPassword.messages.passwordMismatch')
+            "
           >
             <template #prepend>
               <q-icon name="lock" />
@@ -127,8 +153,8 @@
                 tabindex="0"
                 :aria-label="
                   showConfirmPassword
-                    ? t('settings.edit.confirmPassword')
-                    : t('settings.edit.newPassword')
+                    ? t('components.mainInput.password.hide')
+                    : t('components.mainInput.password.show')
                 "
                 :aria-pressed="showConfirmPassword"
                 @click="showConfirmPassword = !showConfirmPassword"
@@ -152,138 +178,31 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import { useQuasar } from 'quasar';
-import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import axios from 'axios';
 
 import PhraseLibrary from '@/components/auth/PhraseLibrary.vue';
 import BtnDivider from '@/components/others/BtnDivider.vue';
 
-import { forgotPassword } from '@/services/authService';
-import { isValidEmail } from '@/utils/userValidators';
+import { useForgotPassword } from '@/composables/auth/useForgotPassword';
 
-const $q = useQuasar();
-const router = useRouter();
-const { t } = useI18n({ useScope: 'global' });
+const { t } = useI18n({
+  useScope: 'global',
+});
 
-const email = ref('');
-const cpf = ref('');
-const password = ref('');
-const confirmPassword = ref('');
-const loading = ref(false);
-
-const showPassword = ref(false);
-const showConfirmPassword = ref(false);
-
-async function btnForgotPassword() {
-  if (loading.value) return;
-
-  if (!email.value.trim() || !cpf.value.trim() || !password.value || !confirmPassword.value) {
-    $q.notify({
-      type: 'negative',
-      message: t('auth.forgotPassword.messages.requiredFields'),
-    });
-    return;
-  }
-
-  const formattedEmail = email.value.trim().toLowerCase();
-
-  if (!isValidEmail(formattedEmail)) {
-    $q.notify({
-      type: 'negative',
-      message: t('auth.forgotPassword.messages.invalidEmail'),
-    });
-    return;
-  }
-
-  const cpfNumbers = cpf.value.replace(/\D/g, '');
-
-  if (cpfNumbers.length !== 11) {
-    $q.notify({
-      type: 'negative',
-      message: t('auth.forgotPassword.messages.invalidCpf'),
-    });
-    return;
-  }
-
-  const cpfFormatted = `${cpfNumbers.slice(0, 3)}.${cpfNumbers.slice(3, 6)}.${cpfNumbers.slice(6, 9)}-${cpfNumbers.slice(9, 11)}`;
-
-  if (password.value !== confirmPassword.value) {
-    $q.notify({
-      type: 'negative',
-      message: t('auth.forgotPassword.messages.passwordMismatch'),
-    });
-    return;
-  }
-
-  loading.value = true;
-
-  try {
-    await forgotPassword({
-      email: formattedEmail,
-      cpf: cpfFormatted,
-      newPassword: password.value,
-      confirmPassword: confirmPassword.value,
-    });
-
-    $q.notify({
-      type: 'positive',
-      message: t('auth.forgotPassword.messages.success'),
-    });
-
-    password.value = '';
-    confirmPassword.value = '';
-
-    await router.replace('/');
-  } catch (error: unknown) {
-    if (axios.isAxiosError(error)) {
-      const status = error.response?.status;
-      const errors = error.response?.data?.errors;
-
-      console.error('Status:', status);
-      console.error('Erros de validação:', errors);
-
-      let message = t('auth.forgotPassword.messages.resetError');
-
-      if (status === 400) {
-        message = t('auth.forgotPassword.messages.invalidData');
-      } else if (status === 401 || status === 403) {
-        message = t('auth.forgotPassword.messages.validationError');
-      } else if (status === 404) {
-        message = t('auth.forgotPassword.messages.notFound');
-      } else if (!error.response) {
-        message = t('auth.forgotPassword.messages.connectionError');
-      }
-
-      $q.notify({
-        type: 'negative',
-        message,
-      });
-    } else {
-      console.error('Erro inesperado:', error);
-
-      $q.notify({
-        type: 'negative',
-        message: t('auth.forgotPassword.messages.unexpectedError'),
-      });
-    }
-  } finally {
-    loading.value = false;
-  }
-}
-
-async function btnCancel() {
-  email.value = '';
-  cpf.value = '';
-  password.value = '';
-  confirmPassword.value = '';
-  showPassword.value = false;
-  showConfirmPassword.value = false;
-
-  await router.push('/');
-}
+const {
+  email,
+  cpf,
+  password,
+  confirmPassword,
+  loading,
+  submitted,
+  showPassword,
+  showConfirmPassword,
+  isValidEmail,
+  isValidCpfLength,
+  btnForgotPassword,
+  btnCancel,
+} = useForgotPassword();
 </script>
 
 <style scoped>
@@ -291,13 +210,14 @@ async function btnCancel() {
   background-color: var(--bg-card);
   color: var(--text-main);
   width: 100%;
-  max-width: 18.75rem;
+  max-width: 21rem;
   border-radius: 1.875rem;
-  padding: 1rem 1.25rem;
+  padding: 1.75rem 1.5rem;
   display: flex;
   flex-direction: column;
   align-items: center;
   flex-shrink: 0;
+  box-sizing: border-box;
 }
 
 .arrow-back {
@@ -314,17 +234,18 @@ async function btnCancel() {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.25rem;
-  margin-bottom: 0.75rem;
+  gap: 0.35rem;
+  margin-bottom: 1.5rem;
 }
 
 .title-form img {
-  width: 2.5rem;
+  width: 2.75rem;
+  height: auto;
 }
 
 .title-form h4 {
   margin: 0;
-  font-size: 1.4rem;
+  font-size: 1.55rem;
   font-weight: 700;
   line-height: 1.2;
   text-align: center;
@@ -332,30 +253,42 @@ async function btnCancel() {
 
 .forgot-form {
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
 }
 
 .input-group {
-  margin-bottom: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
 }
 
 .input-group label {
   display: block;
-  margin-bottom: 0.15rem;
   color: var(--text-main);
   font-size: 0.85rem;
+  font-weight: 500;
   line-height: 1.25;
 }
 
-.input,
+.input {
+  width: 100%;
+}
+
 .input :deep(.q-field__control) {
   background-color: var(--bg-input);
   border-radius: 1rem;
 }
 
-.input :deep(.q-field__control::before),
+.input :deep(.q-field__control::before) {
+  border: 1px solid var(--border-color);
+  border-radius: 1rem;
+}
+
 .input :deep(.q-field__control::after) {
   border-radius: 1rem;
-  border: 1px solid var(--border-color);
 }
 
 .input :deep(.q-field__native) {
@@ -370,5 +303,15 @@ async function btnCancel() {
 .input :deep(.q-field__prepend),
 .input :deep(.q-field__append) {
   color: var(--text-main);
+}
+
+.input :deep(.q-field__bottom) {
+  padding: 0.35rem 0.25rem 0;
+}
+
+.input :deep(.q-field__messages) {
+  font-size: 0.75rem;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
 }
 </style>

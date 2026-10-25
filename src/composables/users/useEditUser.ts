@@ -1,4 +1,5 @@
 import { reactive, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import axios from 'axios';
 
 import { getUserById, adminUpdateUser } from '@/services/userService';
@@ -28,6 +29,8 @@ type EditUserForm = {
 type EditUserResult = { success: true; updated: boolean } | { success: false; message: string };
 
 export function useEditUser() {
+  const { t } = useI18n({ useScope: 'global' });
+
   const loading = ref(false);
   const loaded = ref(false);
   const saving = ref(false);
@@ -102,7 +105,7 @@ export function useEditUser() {
 
   function validateForm(): string | null {
     if (!originalUser.value) {
-      return 'Não foi possível identificar o usuário.';
+      return t('users.edit.validation.userNotIdentified');
     }
 
     const nameCompleted = form.nameCompleted.trim();
@@ -114,25 +117,25 @@ export function useEditUser() {
     const dateBirth = formatDateToISO(form.birthDate);
 
     if (!isValidFullName(nameCompleted)) {
-      return 'Informe nome e sobrenome válidos.';
+      return t('users.edit.validation.invalidName');
     }
 
     if (!isValidEmail(email)) {
-      return 'Informe um e-mail válido.';
+      return t('users.edit.validation.invalidEmail');
     }
 
     if (!isValidPhone(phone)) {
-      return 'Informe um telefone no formato (85) 99999-9999.';
+      return t('users.edit.validation.invalidPhone');
     }
 
     const cpfChanged = cpf.replace(/\D/g, '') !== originalUser.value.cpf.replace(/\D/g, '');
 
     if (cpfChanged && !isValidCPF(cpf)) {
-      return 'Informe um CPF válido.';
+      return t('users.edit.validation.invalidCpf');
     }
 
     if (!dateBirth) {
-      return 'Informe uma data de nascimento válida.';
+      return t('users.edit.validation.invalidBirthDate');
     }
 
     const today = new Date();
@@ -144,11 +147,11 @@ export function useEditUser() {
     ].join('-');
 
     if (dateBirth >= todayISO) {
-      return 'A data de nascimento deve ser anterior à data atual.';
+      return t('users.edit.validation.futureBirthDate');
     }
 
     if (!isValidAddress(address)) {
-      return 'O endereço é obrigatório.';
+      return t('users.edit.validation.addressRequired');
     }
 
     return null;
@@ -200,28 +203,28 @@ export function useEditUser() {
 
   function getErrorMessage(error: unknown): string {
     if (!axios.isAxiosError(error)) {
-      return 'Ocorreu um erro inesperado.';
+      return t('users.edit.messages.unexpectedError');
     }
 
     if (!error.response) {
-      return 'Não foi possível conectar ao servidor.';
+      return t('users.edit.messages.connectionError');
     }
 
     switch (error.response.status) {
       case 400:
-        return 'Verifique os dados informados.';
+        return t('users.edit.messages.invalidData');
 
       case 403:
-        return 'Você não tem permissão para editar este usuário.';
+        return t('users.edit.messages.forbidden');
 
       case 404:
-        return 'Usuário não encontrado.';
+        return t('users.edit.messages.notFound');
 
       case 409:
-        return 'O e-mail ou CPF informado já está sendo utilizado.';
+        return t('users.edit.messages.duplicate');
 
       default:
-        return 'Ocorreu um erro ao atualizar o usuário.';
+        return t('users.edit.messages.updateError');
     }
   }
 
@@ -229,7 +232,7 @@ export function useEditUser() {
     if (saving.value || !loaded.value || selectedUserId.value === null) {
       return {
         success: false,
-        message: 'Não foi possível iniciar a atualização.',
+        message: t('users.edit.messages.cannotStartUpdate'),
       };
     }
 

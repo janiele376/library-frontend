@@ -77,7 +77,7 @@ export function usePublisherForm(onSaved: () => void) {
     isOpen.value = false;
   }
 
-  function getValidationError(): string | null {
+  function isFormValid(): boolean {
     const validations = [
       validateName(form.name),
       validateCnpj(form.cnpj),
@@ -86,22 +86,13 @@ export function usePublisherForm(onSaved: () => void) {
       validateAddress(form.address),
     ];
 
-    const error = validations.find((result) => result !== true);
-
-    return typeof error === 'string' ? t(error) : null;
+    return validations.every((result) => result === true);
   }
 
   async function savePublisher(): Promise<void> {
     if (saving.value) return;
 
-    const validationError = getValidationError();
-
-    if (validationError) {
-      $q.notify({
-        type: 'warning',
-        message: validationError,
-      });
-
+    if (!isFormValid()) {
       return;
     }
 

@@ -19,7 +19,7 @@ export function validateName(value: string): ValidationResult {
 }
 
 export function validateCnpj(value: string): ValidationResult {
-  if (!value) {
+  if (!value?.trim()) {
     return 'publishers.validation.cnpjRequired';
   }
 
@@ -35,7 +35,7 @@ export function validateEmail(value: string): ValidationResult {
 }
 
 export function validatePhone(value: string): ValidationResult {
-  if (!value) {
+  if (!value?.trim()) {
     return 'publishers.validation.phoneRequired';
   }
 

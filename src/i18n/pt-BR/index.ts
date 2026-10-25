@@ -31,6 +31,12 @@ export default {
         loginError: 'Não foi possível realizar o login.',
         unexpectedError: 'Ocorreu um erro inesperado.',
       },
+
+      validation: {
+        emailRequired: 'O e-mail é obrigatório.',
+        invalidEmail: 'Informe um e-mail válido.',
+        passwordRequired: 'A senha é obrigatória.',
+      },
     },
 
     register: {
@@ -67,6 +73,18 @@ export default {
         invalidData: 'Verifique os dados informados.',
         connectionError: 'Não foi possível conectar ao servidor.',
         unexpectedError: 'Ocorreu um erro inesperado.',
+      },
+
+      validation: {
+        nameRequired: 'O nome completo é obrigatório.',
+        invalidName: 'Informe nome e sobrenome válidos.',
+        birthDateRequired: 'A data de nascimento é obrigatória.',
+        emailRequired: 'O e-mail é obrigatório.',
+        cpfRequired: 'O CPF é obrigatório.',
+        phoneRequired: 'O telefone é obrigatório.',
+        addressRequired: 'O endereço é obrigatório.',
+        passwordRequired: 'A senha é obrigatória.',
+        confirmPasswordRequired: 'Confirme sua senha.',
       },
     },
 
@@ -232,6 +250,12 @@ export default {
       quantity: 'Quantidade de Livros:',
       confirmButton: 'CONFIRMAR',
       cancelButton: 'CANCELAR',
+
+      genre: 'Gênero:',
+      isbn: 'ISBN:',
+      requiredField: 'Este campo é obrigatório.',
+      publisherRequired: 'Selecione uma editora.',
+      quantityInvalid: 'Informe uma quantidade válida entre 0 e 2147483647.',
     },
 
     page: {
@@ -433,6 +457,7 @@ export default {
       invalidRentalId: 'ID do empréstimo inválido.',
       operationSuccess: 'Operação realizada com sucesso!',
       operationError: 'Não foi possível concluir a operação. Confira os dados.',
+      loadOptionsError: 'Não foi possível carregar usuários e livros.',
     },
     formExtra: {
       userId: 'ID do usuário',

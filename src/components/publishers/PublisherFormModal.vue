@@ -18,7 +18,13 @@
         </h2>
       </div>
 
-      <q-form class="publisher-form" @submit="savePublisher">
+      <q-form
+        ref="publisherFormRef"
+        class="publisher-form"
+        novalidate
+        @submit.prevent="savePublisher"
+        @validation-error="hasValidated = true"
+      >
         <div class="input-group">
           <label for="publisher-name">
             {{ t('publishers.form.name') }}
@@ -35,7 +41,8 @@
             outlined
             hide-bottom-space
             :disable="saving"
-            :rules="[validateName]"
+            :rules="publisherRules.name"
+            lazy-rules="ondemand"
           >
             <template #prepend>
               <q-icon name="business" />
@@ -57,7 +64,8 @@
             outlined
             hide-bottom-space
             :disable="isEditing || saving"
-            :rules="[validateCnpj]"
+            :rules="publisherRules.cnpj"
+            lazy-rules="ondemand"
           >
             <template #prepend>
               <q-icon name="badge" />
@@ -74,13 +82,15 @@
             id="publisher-email"
             v-model="form.email"
             class="input"
-            type="email"
+            type="text"
+            inputmode="email"
             autocomplete="email"
             dense
             outlined
             hide-bottom-space
             :disable="saving"
-            :rules="[validateEmail]"
+            :rules="publisherRules.email"
+            lazy-rules="ondemand"
           >
             <template #prepend>
               <q-icon name="email" />
@@ -104,7 +114,8 @@
             outlined
             hide-bottom-space
             :disable="saving"
-            :rules="[validatePhone]"
+            :rules="publisherRules.phone"
+            lazy-rules="ondemand"
           >
             <template #prepend>
               <q-icon name="phone" />
@@ -128,7 +139,8 @@
             outlined
             hide-bottom-space
             :disable="saving"
-            :rules="[validateAddress]"
+            :rules="publisherRules.address"
+            lazy-rules="ondemand"
           >
             <template #prepend>
               <q-icon name="location_on" />
@@ -165,8 +177,11 @@
 </template>
 
 <script setup lang="ts">
+import { computed, nextTick, ref, watch } from 'vue';
+import type { QForm } from 'quasar';
 import { useI18n } from 'vue-i18n';
-import { usePublisherForm } from '@/composables/usePublisherForm';
+
+import { usePublisherForm } from '@/composables/publishers/usePublisherForm';
 
 import {
   validateName,
@@ -176,11 +191,16 @@ import {
   validateAddress,
 } from '@/utils/publisherValidation';
 
-const { t } = useI18n({ useScope: 'global' });
+import type { ValidationResult } from '@/utils/publisherValidation';
+
+const { t, locale } = useI18n({ useScope: 'global' });
 
 const emit = defineEmits<{
   saved: [];
 }>();
+
+const publisherFormRef = ref<QForm | null>(null);
+const hasValidated = ref(false);
 
 const {
   form,
@@ -192,6 +212,37 @@ const {
   closeModal,
   savePublisher,
 } = usePublisherForm(() => emit('saved'));
+
+function translateValidation(result: ValidationResult): true | string {
+  return result === true ? true : t(result);
+}
+
+const publisherRules = computed(() => ({
+  name: [(value: string) => translateValidation(validateName(value))],
+  cnpj: [(value: string) => translateValidation(validateCnpj(value))],
+  email: [(value: string) => translateValidation(validateEmail(value))],
+  phone: [(value: string) => translateValidation(validatePhone(value))],
+  address: [(value: string) => translateValidation(validateAddress(value))],
+}));
+
+watch(locale, async () => {
+  if (!isOpen.value || !hasValidated.value) return;
+
+  await nextTick();
+  await publisherFormRef.value?.validate();
+});
+
+watch(isOpen, async (opened) => {
+  if (!opened) {
+    hasValidated.value = false;
+    return;
+  }
+
+  hasValidated.value = false;
+
+  await nextTick();
+  publisherFormRef.value?.resetValidation();
+});
 
 defineExpose({
   openCreateModal,
@@ -243,28 +294,38 @@ defineExpose({
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  box-sizing: border-box;
 }
 
 .input-group {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.35rem;
+  min-width: 0;
 }
 
 .input-group label {
   font-size: 0.9rem;
+  font-weight: 500;
+  line-height: 1.25;
   color: var(--text-main);
 }
 
-.input,
+.input {
+  width: 100%;
+}
+
 .input :deep(.q-field__control) {
   background-color: var(--bg-input);
   border-radius: 1rem;
 }
 
-.input :deep(.q-field__control::before),
-.input :deep(.q-field__control::after) {
+.input :deep(.q-field__control::before) {
   border: 1px solid var(--border-color);
+  border-radius: 1rem;
+}
+
+.input :deep(.q-field__control::after) {
   border-radius: 1rem;
 }
 
@@ -272,8 +333,24 @@ defineExpose({
   color: var(--text-main);
 }
 
+.input :deep(.q-field__native::placeholder) {
+  color: var(--text-muted);
+  opacity: 1;
+}
+
 .input :deep(.q-field__prepend) {
   color: var(--text-main);
+}
+
+.input :deep(.q-field__bottom) {
+  padding: 0.35rem 0.5rem 0;
+}
+
+.input :deep(.q-field__messages) {
+  font-size: 0.75rem;
+  line-height: 1.35;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .modal-actions {
@@ -281,7 +358,7 @@ defineExpose({
   justify-content: center;
   flex-wrap: wrap;
   gap: 0.75rem;
-  margin-top: 0.5rem;
+  margin-top: 0.75rem;
 }
 
 .btn-confirm,

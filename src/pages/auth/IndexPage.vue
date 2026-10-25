@@ -5,6 +5,7 @@
     <div class="container-form">
       <div class="title-form">
         <img src="@/assets/book-logo.svg" :alt="t('header.accessibility.logo')" />
+
         <h4>{{ t('auth.login.title') }}</h4>
       </div>
 
@@ -23,6 +24,13 @@
             autocomplete="email"
             dense
             outlined
+            hide-bottom-space
+            :error="submitted && (!email.trim() || !isValidEmail(email))"
+            :error-message="
+              !email.trim()
+                ? t('auth.login.validation.emailRequired')
+                : t('auth.login.validation.invalidEmail')
+            "
           >
             <template #prepend>
               <q-icon name="email" />
@@ -44,6 +52,9 @@
             autocomplete="current-password"
             dense
             outlined
+            hide-bottom-space
+            :error="submitted && !password.trim()"
+            :error-message="t('auth.login.validation.passwordRequired')"
           >
             <template #prepend>
               <q-icon name="lock" />
@@ -95,88 +106,28 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-import { useQuasar } from 'quasar';
 import { useI18n } from 'vue-i18n';
-import axios from 'axios';
 
 import PhraseLibrary from '@/components/auth/PhraseLibrary.vue';
 import BtnDivider from '@/components/others/BtnDivider.vue';
 import AuthFooter from '@/components/auth/AuthFooter.vue';
-import { useAuthStore } from '@/stores/authStore';
 
-const $q = useQuasar();
-const router = useRouter();
-const { t } = useI18n({ useScope: 'global' });
-const authStore = useAuthStore();
+import { useLogin } from '@/composables/auth/useLogin';
 
-const email = ref('');
-const password = ref('');
-const showPassword = ref(false);
-const loading = ref(false);
+const { t } = useI18n({
+  useScope: 'global',
+});
 
-function togglePassword() {
-  showPassword.value = !showPassword.value;
-}
-
-async function btnLogin() {
-  if (loading.value) return;
-
-  if (!email.value.trim() || !password.value) {
-    $q.notify({
-      type: 'warning',
-      message: t('auth.login.messages.requiredFields'),
-    });
-    return;
-  }
-
-  loading.value = true;
-
-  try {
-    await authStore.login({
-      email: email.value.trim().toLowerCase(),
-      password: password.value,
-    });
-
-    $q.notify({
-      type: 'positive',
-      message: t('auth.login.messages.success'),
-    });
-
-    await router.replace('/dashboard');
-  } catch (error: unknown) {
-    if (axios.isAxiosError(error)) {
-      const status = error.response?.status;
-
-      if (status === 400 || status === 401) {
-        $q.notify({
-          type: 'negative',
-          message: t('auth.login.messages.invalidCredentials'),
-        });
-      } else if (!error.response) {
-        $q.notify({
-          type: 'negative',
-          message: t('auth.login.messages.connectionError'),
-        });
-      } else {
-        $q.notify({
-          type: 'negative',
-          message: t('auth.login.messages.loginError'),
-        });
-      }
-    } else {
-      console.error('Erro inesperado no login:', error);
-
-      $q.notify({
-        type: 'negative',
-        message: t('auth.login.messages.unexpectedError'),
-      });
-    }
-  } finally {
-    loading.value = false;
-  }
-}
+const {
+  email,
+  password,
+  showPassword,
+  loading,
+  submitted,
+  isValidEmail,
+  togglePassword,
+  btnLogin,
+} = useLogin();
 </script>
 
 <style scoped>
@@ -184,30 +135,32 @@ async function btnLogin() {
   background-color: var(--bg-card);
   color: var(--text-main);
   width: 100%;
-  max-width: 18.75rem;
+  max-width: 21rem;
   border-radius: 1.875rem;
-  padding: 1rem 1.25rem;
+  padding: 1.75rem 1.5rem;
   display: flex;
   flex-direction: column;
   align-items: center;
   flex-shrink: 0;
+  box-sizing: border-box;
 }
 
 .title-form {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.25rem;
-  margin-bottom: 0.75rem;
+  gap: 0.35rem;
+  margin-bottom: 1.5rem;
 }
 
 .title-form img {
-  width: 2.5rem;
+  width: 2.75rem;
+  height: auto;
 }
 
 .title-form h4 {
   margin: 0;
-  font-size: 1.4rem;
+  font-size: 1.55rem;
   font-weight: 700;
   line-height: 1.2;
   text-align: center;
@@ -215,29 +168,41 @@ async function btnLogin() {
 
 .login-form {
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
 }
 
 .input-group {
-  margin-bottom: 0.65rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
 }
 
 .input-group label {
   display: block;
-  margin-bottom: 0.2rem;
   color: var(--text-main);
   font-size: 0.9rem;
+  font-weight: 500;
 }
 
-.input,
+.input {
+  width: 100%;
+}
+
 .input :deep(.q-field__control) {
   background-color: var(--bg-input);
   border-radius: 1rem;
 }
 
-.input :deep(.q-field__control::before),
+.input :deep(.q-field__control::before) {
+  border: 1px solid var(--border-color);
+  border-radius: 1rem;
+}
+
 .input :deep(.q-field__control::after) {
   border-radius: 1rem;
-  border: 1px solid var(--border-color);
 }
 
 .input :deep(.q-field__native) {
@@ -254,10 +219,21 @@ async function btnLogin() {
   color: var(--text-main);
 }
 
+.input :deep(.q-field__bottom) {
+  padding: 0.35rem 0.25rem 0;
+}
+
+.input :deep(.q-field__messages) {
+  font-size: 0.75rem;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
 .forgot-password {
   display: flex;
   justify-content: flex-end;
-  margin-bottom: 0.75rem;
+  margin-top: -0.25rem;
+  margin-bottom: 0.25rem;
 }
 
 .btn-forgot-password {
@@ -265,5 +241,10 @@ async function btnLogin() {
   font-size: 0.85rem;
   padding: 0;
   min-height: auto;
+  transition: opacity 0.2s ease;
+}
+
+.btn-forgot-password:hover {
+  opacity: 0.75;
 }
 </style>

@@ -31,6 +31,12 @@ export default {
         loginError: 'Unable to log in.',
         unexpectedError: 'An unexpected error occurred.',
       },
+
+      validation: {
+        emailRequired: 'Email is required.',
+        invalidEmail: 'Enter a valid email address.',
+        passwordRequired: 'Password is required.',
+      },
     },
 
     register: {
@@ -68,6 +74,18 @@ export default {
         connectionError: 'Unable to connect to the server.',
         unexpectedError: 'An unexpected error occurred.',
       },
+
+      validation: {
+        nameRequired: 'Full name is required.',
+        invalidName: 'Enter a valid first and last name.',
+        birthDateRequired: 'Date of birth is required.',
+        emailRequired: 'Email is required.',
+        cpfRequired: 'CPF is required.',
+        phoneRequired: 'Phone number is required.',
+        addressRequired: 'Address is required.',
+        passwordRequired: 'Password is required.',
+        confirmPasswordRequired: 'Please confirm your password.',
+      },
     },
 
     forgotPassword: {
@@ -95,6 +113,13 @@ export default {
         notFound: 'Unable to find the provided information.',
         connectionError: 'Unable to connect to the server.',
         unexpectedError: 'An unexpected error occurred.',
+      },
+
+      validation: {
+        emailRequired: 'Email is required.',
+        cpfRequired: 'CPF is required.',
+        passwordRequired: 'New password is required.',
+        confirmPasswordRequired: 'Please confirm your new password.',
       },
     },
   },
@@ -139,6 +164,29 @@ export default {
       birthDate: 'Date of Birth',
       address: 'Address',
       actions: 'Actions',
+    },
+
+    edit: {
+      validation: {
+        userNotIdentified: 'Unable to identify the user.',
+        invalidName: 'Enter a valid first and last name.',
+        invalidEmail: 'Enter a valid email address.',
+        invalidPhone: 'Enter a phone number in the format (85) 99999-9999.',
+        invalidCpf: 'Enter a valid CPF.',
+        invalidBirthDate: 'Enter a valid date of birth.',
+        futureBirthDate: 'The date of birth must be earlier than today.',
+        addressRequired: 'Address is required.',
+      },
+      messages: {
+        unexpectedError: 'An unexpected error occurred.',
+        connectionError: 'Unable to connect to the server.',
+        invalidData: 'Please check the information provided.',
+        forbidden: 'You do not have permission to edit this user.',
+        notFound: 'User not found.',
+        duplicate: 'The email address or CPF is already in use.',
+        updateError: 'An error occurred while updating the user.',
+        cannotStartUpdate: 'Unable to start the update.',
+      },
     },
 
     editModal: {
@@ -232,6 +280,12 @@ export default {
       quantity: 'Number of Books:',
       confirmButton: 'CONFIRM',
       cancelButton: 'CANCEL',
+
+      genre: 'Genre:',
+      isbn: 'ISBN:',
+      requiredField: 'This field is required.',
+      publisherRequired: 'Please select a publisher.',
+      quantityInvalid: 'Enter a valid quantity between 0 and 2147483647.',
     },
 
     page: {
@@ -436,6 +490,7 @@ export default {
       invalidRentalId: 'Invalid rental ID.',
       operationSuccess: 'Operation completed successfully!',
       operationError: 'Unable to complete the operation. Please check the information.',
+      loadOptionsError: 'Unable to load users and books.',
     },
     formExtra: {
       userId: 'User ID',

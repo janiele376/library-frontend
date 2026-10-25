@@ -1,5 +1,5 @@
 <template>
-  <div id="header">
+  <header id="header">
     <div class="container-title">
       <img
         class="img-book"
@@ -10,50 +10,54 @@
       <h2 class="title">
         {{ t('header.title') }}
       </h2>
-
-      <div v-if="login" class="container-user-header">
-        <div class="imgs">
-          <img
-            class="img-user"
-            src="../../assets/book-logo.svg"
-            :alt="t('header.accessibility.userImage')"
-          />
-
-          <q-btn
-            class="img-adjustments"
-            icon="settings"
-            to="/settings"
-            flat
-            round
-            dense
-            size="20px"
-            :aria-label="t('header.accessibility.settingsButton')"
-          />
-
-          <q-btn
-            class="img-logout"
-            icon="logout"
-            flat
-            round
-            dense
-            size="20px"
-            :aria-label="t('header.accessibility.logoutButton')"
-            @click="logout"
-          />
-        </div>
-
-        <div class="text">
-          <p id="tenant-logged-name">
-            {{ t('header.user') }}
-          </p>
-
-          <p>{{ t('header.settings') }}</p>
-
-          <p>{{ t('header.logout') }}</p>
-        </div>
-      </div>
     </div>
-  </div>
+
+    <nav v-if="login" class="container-user-header" :aria-label="t('header.title')">
+      <div class="header-item">
+        <div class="icon-wrapper">
+          <q-icon name="account_circle" class="header-icon" />
+        </div>
+
+        <span id="tenant-logged-name" class="header-label">
+          {{ t('header.user') }}
+        </span>
+      </div>
+
+      <div class="header-item">
+        <q-btn
+          class="icon-wrapper header-btn"
+          to="/settings"
+          flat
+          dense
+          unelevated
+          :aria-label="t('header.accessibility.settingsButton')"
+        >
+          <q-icon name="settings" class="header-icon" />
+        </q-btn>
+
+        <span class="header-label">
+          {{ t('header.settings') }}
+        </span>
+      </div>
+
+      <div class="header-item">
+        <q-btn
+          class="icon-wrapper header-btn"
+          flat
+          dense
+          unelevated
+          :aria-label="t('header.accessibility.logoutButton')"
+          @click="logout"
+        >
+          <q-icon name="logout" class="header-icon" />
+        </q-btn>
+
+        <span class="header-label">
+          {{ t('header.logout') }}
+        </span>
+      </div>
+    </nav>
+  </header>
 </template>
 
 <script setup lang="ts">
@@ -69,9 +73,9 @@ withDefaults(defineProps<InputForm>(), {
 });
 
 const router = useRouter();
-const { t } = useI18n();
+const { t } = useI18n({ useScope: 'global' });
 
-function logout() {
+function logout(): void {
   sessionStorage.removeItem('token');
   void router.replace('/');
 }
@@ -79,72 +83,93 @@ function logout() {
 
 <style scoped>
 #header {
+  width: 100%;
+  min-height: 6rem;
+  padding: 0.75rem 2rem;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
   background-color: var(--bg-card);
   color: var(--text-main);
-  width: 100%;
-  min-height: 7rem;
-  display: flex;
-  align-items: center;
-  padding: 0 2rem;
 }
 
-#header .container-title {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 1.25rem;
-}
-
-#header .title {
-  font-size: 1.875rem;
-}
-
-#header .img-book {
-  width: 2.8rem;
-  height: auto;
-  margin-top: -1rem;
-}
-
-#header .container-user-header {
-  margin-left: auto;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0.2rem;
-}
-
-#header .container-user-header .imgs {
+.container-title {
   display: flex;
   align-items: center;
   gap: 1rem;
+  min-width: 0;
 }
 
-#header .container-user-header .text {
+.img-book {
+  width: 2.8rem;
+  height: auto;
+  flex-shrink: 0;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.875rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.container-user-header {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
-  font-size: 0.8rem;
-  margin-right: 1rem;
+  justify-content: flex-end;
+  gap: 0.25rem;
+  flex-shrink: 0;
 }
 
-#header .container-user-header .imgs .img-user {
+.header-item {
+  width: 4rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  text-align: center;
+}
+
+.icon-wrapper {
   width: 2.5rem;
   height: 2.5rem;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-#header .container-user-header .imgs .img-adjustments,
-#header .container-user-header .imgs .img-logout {
-  width: 2.2rem;
-  height: 2.2rem;
-  cursor: pointer;
-  transition: opacity 0.2s;
+  min-width: 2.5rem;
+  min-height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
   color: var(--text-main);
 }
 
-#header .container-user-header .imgs .img-adjustments:hover,
-#header .container-user-header .imgs .img-logout:hover {
-  opacity: 0.6;
+.header-icon {
+  font-size: 1.8rem;
+  line-height: 1;
+  color: var(--text-main);
+}
+
+.header-btn {
+  border-radius: 50%;
+  transition: opacity 0.2s ease;
+}
+
+.header-btn:hover {
+  opacity: 0.65;
+}
+
+.header-label {
+  width: 100%;
+  min-height: 1.8rem;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  font-size: 0.8rem;
+  line-height: 1.2;
+  text-align: center;
+  color: var(--text-main);
+  overflow-wrap: anywhere;
 }
 </style>

@@ -31,6 +31,12 @@ export default {
         loginError: 'No se ha podido iniciar sesión.',
         unexpectedError: 'Se ha producido un error inesperado.',
       },
+
+      validation: {
+        emailRequired: 'El correo electrónico es obligatorio.',
+        invalidEmail: 'Introduce un correo electrónico válido.',
+        passwordRequired: 'La contraseña es obligatoria.',
+      },
     },
 
     register: {
@@ -68,6 +74,18 @@ export default {
         connectionError: 'No se ha podido conectar con el servidor.',
         unexpectedError: 'Se ha producido un error inesperado.',
       },
+
+      validation: {
+        nameRequired: 'El nombre completo es obligatorio.',
+        invalidName: 'Introduce un nombre y apellido válidos.',
+        birthDateRequired: 'La fecha de nacimiento es obligatoria.',
+        emailRequired: 'El correo electrónico es obligatorio.',
+        cpfRequired: 'El CPF es obligatorio.',
+        phoneRequired: 'El teléfono es obligatorio.',
+        addressRequired: 'La dirección es obligatoria.',
+        passwordRequired: 'La contraseña es obligatoria.',
+        confirmPasswordRequired: 'Confirma tu contraseña.',
+      },
     },
 
     forgotPassword: {
@@ -95,6 +113,13 @@ export default {
         notFound: 'No se han encontrado los datos proporcionados.',
         connectionError: 'No se ha podido conectar con el servidor.',
         unexpectedError: 'Se ha producido un error inesperado.',
+      },
+
+      validation: {
+        emailRequired: 'El correo electrónico es obligatorio.',
+        cpfRequired: 'El CPF es obligatorio.',
+        passwordRequired: 'La nueva contraseña es obligatoria.',
+        confirmPasswordRequired: 'Confirma la nueva contraseña.',
       },
     },
   },
@@ -139,6 +164,29 @@ export default {
       birthDate: 'Fecha de nacimiento',
       address: 'Dirección',
       actions: 'Acciones',
+    },
+
+    edit: {
+      validation: {
+        userNotIdentified: 'No se pudo identificar al usuario.',
+        invalidName: 'Introduce un nombre y apellido válidos.',
+        invalidEmail: 'Introduce un correo electrónico válido.',
+        invalidPhone: 'Introduce un teléfono con el formato (85) 99999-9999.',
+        invalidCpf: 'Introduce un CPF válido.',
+        invalidBirthDate: 'Introduce una fecha de nacimiento válida.',
+        futureBirthDate: 'La fecha de nacimiento debe ser anterior a hoy.',
+        addressRequired: 'La dirección es obligatoria.',
+      },
+      messages: {
+        unexpectedError: 'Se produjo un error inesperado.',
+        connectionError: 'No se pudo conectar con el servidor.',
+        invalidData: 'Comprueba los datos introducidos.',
+        forbidden: 'No tienes permiso para editar este usuario.',
+        notFound: 'Usuario no encontrado.',
+        duplicate: 'El correo electrónico o CPF ya está en uso.',
+        updateError: 'Se produjo un error al actualizar el usuario.',
+        cannotStartUpdate: 'No se pudo iniciar la actualización.',
+      },
     },
 
     editModal: {
@@ -232,6 +280,12 @@ export default {
       quantity: 'Cantidad de libros:',
       confirmButton: 'CONFIRMAR',
       cancelButton: 'CANCELAR',
+
+      genre: 'Género:',
+      isbn: 'ISBN:',
+      requiredField: 'Este campo es obligatorio.',
+      publisherRequired: 'Selecciona una editorial.',
+      quantityInvalid: 'Introduce una cantidad válida entre 0 y 2147483647.',
     },
 
     page: {
@@ -437,6 +491,7 @@ export default {
       invalidRentalId: 'Identificador de préstamo no válido.',
       operationSuccess: '¡Operación realizada correctamente!',
       operationError: 'No se pudo completar la operación. Revisa los datos.',
+      loadOptionsError: 'No se pudieron cargar los usuarios y libros.',
     },
     formExtra: {
       userId: 'ID del usuario',
