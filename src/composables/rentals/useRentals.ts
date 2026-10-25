@@ -15,7 +15,9 @@ export function useRentals() {
   const $q = useQuasar();
 
   const rentals = ref<RentalData[]>([]);
-  const searchTerm = ref('');
+
+  const searchTerm = ref<string | null>('');
+
   const currentPage = ref(1);
   const totalPages = ref(1);
 
@@ -36,7 +38,7 @@ export function useRentals() {
     loading.value = true;
 
     try {
-      const search = searchTerm.value.trim();
+      const search = (searchTerm.value ?? '').trim();
 
       const response = await getRentals(
         currentPage.value - 1,

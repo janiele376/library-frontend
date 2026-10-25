@@ -12,7 +12,9 @@ export function usePublishers() {
   const $q = useQuasar();
 
   const publishers = ref<PublisherResponse[]>([]);
-  const searchTerm = ref('');
+
+  const searchTerm = ref<string | null>('');
+
   const currentPage = ref(1);
   const totalPages = ref(1);
 
@@ -30,11 +32,9 @@ export function usePublishers() {
     loading.value = true;
 
     try {
-      const response = await getPublishers(
-        currentPage.value - 1,
-        pageSize,
-        searchTerm.value.trim(),
-      );
+      const search = (searchTerm.value ?? '').trim();
+
+      const response = await getPublishers(currentPage.value - 1, pageSize, search);
 
       if (requestId !== requestSequence) return;
 
@@ -46,8 +46,10 @@ export function usePublishers() {
       }
 
       publishers.value = response.content;
-    } catch {
+    } catch (error: unknown) {
       if (requestId !== requestSequence) return;
+
+      console.error('Erro ao carregar editoras:', error);
 
       publishers.value = [];
       totalPages.value = 1;
@@ -78,6 +80,8 @@ export function usePublishers() {
 
       await loadPublishers();
     } catch (error: unknown) {
+      console.error('Erro ao excluir editora:', error);
+
       const message =
         axios.isAxiosError(error) && error.response?.status === 409
           ? t('publishers.messages.deleteConflict')

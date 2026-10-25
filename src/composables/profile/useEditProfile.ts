@@ -138,7 +138,8 @@ export function useEditProfile() {
       loaded.value = true;
     } catch (error: unknown) {
       console.error('Erro ao carregar perfil:', error);
-      notifyError(t('settings.edit.loadError'));
+
+      notifyError(t('settings.editMessages.loadError'));
     } finally {
       loading.value = false;
     }
@@ -153,12 +154,17 @@ export function useEditProfile() {
     }
 
     if (form.currentPassword.length < 8) {
-      notifyError(t('settings.edit.currentPasswordMinLength'));
+      notifyError(t('settings.editMessages.currentPasswordMinLength'));
       return;
     }
 
     if (form.newPassword || form.confirmPassword) {
-      if (form.newPassword.length < 8 || form.newPassword !== form.confirmPassword) {
+      if (form.newPassword.length < 8) {
+        notifyError(t('settings.edit.newPasswordMinLength'));
+        return;
+      }
+
+      if (form.newPassword !== form.confirmPassword) {
         notifyError(t('settings.edit.passwordMismatch'));
         return;
       }
@@ -170,30 +176,34 @@ export function useEditProfile() {
     const address = form.address.trim();
 
     if (!isValidFullName(nameCompleted)) {
-      notifyError(t('settings.edit.invalidFullName'));
+      notifyError(t('settings.editMessages.invalidFullName'));
       return;
     }
 
     if (!isValidEmail(email)) {
-      notifyError(t('settings.edit.invalidEmail'));
+      notifyError(t('settings.editMessages.invalidEmail'));
       return;
     }
 
     if (!isValidPhone(phone)) {
-      notifyError(t('settings.edit.invalidPhone'));
+      notifyError(t('settings.editMessages.invalidPhone'));
       return;
     }
 
     if (!isValidAddress(address)) {
-      notifyError(t('settings.edit.invalidAddress'));
+      notifyError(t('settings.editMessages.invalidAddress'));
       return;
     }
 
     const data: UpdateUserRequest = {
       nameCompleted: nameCompleted !== originalUser.value.nameCompleted ? nameCompleted : null,
+
       email: email !== originalUser.value.email ? email : null,
+
       phone: phone !== originalUser.value.phone ? phone : null,
+
       address: address !== originalUser.value.address ? address : null,
+
       password: form.newPassword || null,
       currentPassword: form.currentPassword,
     };
@@ -208,7 +218,7 @@ export function useEditProfile() {
 
       $q.notify({
         type: 'positive',
-        message: t('settings.edit.updateSuccess'),
+        message: t('settings.editMessages.updateSuccess'),
       });
 
       if (emailChanged || passwordChanged) {
@@ -223,11 +233,11 @@ export function useEditProfile() {
         const status = error.response?.status;
 
         if (status === 400) {
-          notifyError(t('settings.edit.invalidCurrentPassword'));
+          notifyError(t('settings.editMessages.invalidCurrentPassword'));
         } else if (status === 409) {
-          notifyError(t('settings.edit.emailAlreadyInUse'));
+          notifyError(t('settings.editMessages.emailAlreadyInUse'));
         } else if (status === 403) {
-          notifyError(t('settings.edit.permissionDenied'));
+          notifyError(t('settings.editMessages.permissionDenied'));
         } else if (!error.response) {
           notifyError(t('auth.login.messages.connectionError'));
         } else {
